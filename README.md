@@ -46,7 +46,7 @@ A comprehensive college event management platform that connects students and org
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/Bhoumik-006/collage_project.git
+   git clone https://github.com/Bhoumik-006/collage_project_final_.git
    cd collage_project
    ```
 
