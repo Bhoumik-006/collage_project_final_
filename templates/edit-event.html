@@ -1,0 +1,287 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event | Organizer Portal</title>
+    <link rel="stylesheet" href="{% static 'css/organizer.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+    <style>
+        /* Fix any sidebar glitches */
+        .sidebar-nav ul li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .sidebar-nav ul li a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .sidebar-nav ul li a i {
+            margin-right: 10px;
+            width: 16px;
+        }
+        /* Form step navigation fixes */
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+        }
+        /* Image Preview for Edit Event */
+        .image-preview { 
+            max-width: 250px; 
+            max-height: 180px;
+            width: auto;
+            height: auto;
+            margin-top: 15px; 
+            border-radius: 8px; 
+            object-fit: contain;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-page">
+        <aside class="sidebar">
+            <div class="logo">S<strong>C</strong> | Org</div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="#" onclick="goToDashboard()" title="Dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                    <li><a href="#" onclick="goToCreateEvent()" title="Create Event"><i class="fas fa-plus-circle"></i><span>Create Event</span></a></li>
+                    <li><a href="#" onclick="goToProfile()" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <form method="post" action="{% url 'logout' %}" id="logout-form">
+                    {% csrf_token %}
+                    <button type="button" id="logoutBtn" onclick="confirmLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="dashboard-content">
+            <section id="edit-event-view" class="dashboard-view">
+                <header class="view-header">
+                    <h2>Edit Event</h2>
+                    <p>Update the details for your event below.</p>
+                </header>
+                <form id="event-form" class="event-form-container" method="POST" action="{% url 'edit_event' event.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-step active">
+                        <h3>Step 1: Basic Information</h3>
+                        <div class="form-group">
+                            <label for="event-title">Event Title</label>
+                            <input type="text" id="event-title" name="title" placeholder="e.g., Annual Tech Hackathon" value="{{ event.title }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-category">Category</label>
+                            <select id="event-category" name="category">
+                                <option value="hackathon" {% if event.category == 'hackathon' %}selected{% endif %}>Hackathon</option>
+                                <option value="workshop" {% if event.category == 'workshop' %}selected{% endif %}>Workshop</option>
+                                <option value="internship" {% if event.category == 'internship' %}selected{% endif %}>Internship</option>
+                                <option value="techevent" {% if event.category == 'techevent' %}selected{% endif %}>TechEvent</option> 
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-date">Event Date</label>
+                            <input type="date" id="event-date" name="date" value="{{ event.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-time">Event Time</label>
+                            <input type="time" id="event-time" name="time" value="{{ event.time|time:'H:i' }}" required>
+                        </div>
+                    </div>
+                    <div class="form-step">
+                         <h3>Step 2: Details & Location</h3>
+                         <div class="form-group">
+                            <label for="event-description">Description</label>
+                            <textarea id="event-description" name="description" rows="5" placeholder="Describe your event...">{{ event.description }}</textarea>
+                         </div>
+                         <div class="form-group">
+                            <label for="event-location">Location</label>
+                            <input type="text" id="event-location" name="location" placeholder="e.g., Main Auditorium, City Center" value="{{ event.venue }}" required>
+                         </div>
+                         <div class="form-group">
+                             <label for="event-flyer">Event Flyer (Optional)</label>
+                             <div id="drag-drop-area" class="drag-drop-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Drag & Drop</strong> an image here or click to upload</p>
+                                <input type="file" id="event-flyer" name="event_flyer" accept="image/*" hidden>
+                             </div>
+                             {% if event.image %}
+                                <img id="image-preview" class="image-preview" src="{{ event.image.url }}" alt="Current Event Image"/>
+                                <p style="margin-top: 10px; color: #6c757d; font-size: 14px;">Current image: {{ event.image.name }}</p>
+                             {% else %}
+                                <img id="image-preview" class="image-preview hidden" src="#" alt="Image Preview"/>
+                             {% endif %}
+                         </div>
+                        <div class="form-group">
+                            <label for="event-link">Event Registration Link <span class="required">*</span></label>
+                            <input type="url" id="event-link" name="event_link" placeholder="https://example.com/register" value="{{ event.registration_link }}" required />
+                            <small class="form-help">Registration link or event website is mandatory for all events</small>
+                         </div>
+                         <div class="form-group">
+                            <label for="event-status">Approval Status</label>
+                            <select id="event-status" name="status">
+                                <option value="pending" {% if event.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="approved" {% if event.status == 'approved' %}selected{% endif %}>Approved</option>
+                                <option value="denied" {% if event.status == 'denied' %}selected{% endif %}>Denied</option>
+                            </select>
+                         </div>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" id="prevBtn" class="cta-button secondary hidden">Previous</button>
+                        <button type="button" id="nextBtn" class="cta-button primary">Next</button>
+                        <button type="submit" id="submitBtn" class="cta-button primary hidden">Update Event</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Custom JavaScript for edit form navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentStep = 0;
+            const steps = document.querySelectorAll('.form-step');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            function showStep(n) {
+                steps.forEach(step => step.classList.remove('active'));
+                if (steps[n]) {
+                    steps[n].classList.add('active');
+                }
+
+                // Update button visibility
+                prevBtn.classList.toggle('hidden', n === 0);
+                nextBtn.classList.toggle('hidden', n === steps.length - 1);
+                submitBtn.classList.toggle('hidden', n !== steps.length - 1);
+            }
+
+            // Next button click
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        showStep(currentStep);
+                    }
+                });
+            }
+
+            // Previous button click
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            }
+
+            // Initialize
+            showStep(currentStep);
+
+            // Drag and drop functionality for image upload
+            const dragDropArea = document.getElementById('drag-drop-area');
+            const fileInput = document.getElementById('event-flyer');
+            const imagePreview = document.getElementById('image-preview');
+
+            if (dragDropArea && fileInput) {
+                dragDropArea.addEventListener('click', () => fileInput.click());
+
+                dragDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.background = '#f0f8ff';
+                });
+
+                dragDropArea.addEventListener('dragleave', () => {
+                    dragDropArea.style.background = '';
+                });
+
+                dragDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.background = '';
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        previewImage(files[0]);
+                    }
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        previewImage(e.target.files[0]);
+                    }
+                });
+            }
+
+            function previewImage(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Sidebar navigation functions
+        function goToDashboard() {
+            // Clear any existing navigation flags to show default dashboard view
+            localStorage.removeItem('showCreateEvent');
+            localStorage.removeItem('showProfile');
+            window.location.href = "{% url 'organizer-dashboard' %}";
+        }
+
+        function goToCreateEvent() {
+            window.location.href = "{% url 'organizer-dashboard' %}";
+            // After redirect, we'll need to trigger the create event view
+            setTimeout(function() {
+                localStorage.setItem('showCreateEvent', 'true');
+            }, 100);
+        }
+
+        function goToProfile() {
+            window.location.href = "{% url 'organizer-dashboard' %}";
+            // After redirect, we'll need to trigger the profile view
+            setTimeout(function() {
+                localStorage.setItem('showProfile', 'true');
+            }, 100);
+        }
+
+        // Global logout confirmation function
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                const logoutForm = document.getElementById('logout-form');
+                if (logoutForm) {
+                    logoutForm.submit();
+                }
+            }
+        }
+
+        // Prevent back button from triggering logout
+        window.addEventListener('beforeunload', function(e) {
+            return undefined;
+        });
+    </script>
+</body>
+</html>

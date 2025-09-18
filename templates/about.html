@@ -1,0 +1,264 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>About Us - StudentConnect</title>
+    <link rel="stylesheet" href="{% static 'css/organizer.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+    <style>
+        .simple-view {
+            display: none;
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .view-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .view-toggle:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <!-- View Toggle Button -->
+    <button class="view-toggle" onclick="toggleView()">Switch to Simple View</button>
+
+    <!-- Full About Page -->
+    <div id="full-view">
+        <!-- Navigation Header -->
+        <header class="main-header">
+            <nav class="container">
+                <div class="logo">
+                    StudentConnect <strong>About</strong>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="{% url 'landing' %}">Home</a></li>
+                    <li><a href="{% url 'about' %}" class="active">About</a></li>
+                    <li><a href="{% url 'login' %}">Login</a></li>
+                </ul>
+            </nav>
+        </header>
+    <section class="about-section">
+        <div class="about-container">
+            <!-- About Header -->
+            <div class="about-header">
+                <h2>About StudentConnect</h2>
+                <p>Empowering students to discover, create, and participate in meaningful campus events that enhance their academic and social experience.</p>
+            </div>
+
+            <!-- About Content -->
+            <div class="about-content">
+                <div class="about-text">
+                    <h3>Our Mission</h3>
+                    <p>
+                        StudentConnect is dedicated to bridging the gap between event organizers and students on campus. 
+                        We believe that every student deserves access to enriching experiences that complement their academic journey 
+                        and help them build lasting connections with their peers.
+                    </p>
+                    <p>
+                        Our platform streamlines the process of event discovery and management, making it easier for students 
+                        to find events that match their interests while providing organizers with powerful tools to reach 
+                        their target audience effectively.
+                    </p>
+                </div>
+                <div class="about-text">
+                    <h3>Our Vision</h3>
+                    <p>
+                        To create a vibrant campus community where every student has the opportunity to engage, learn, 
+                        and grow through diverse events and activities. We envision a future where campus life is more 
+                        connected, inclusive, and accessible to all students.
+                    </p>
+                    <p>
+                        By leveraging technology and user-centered design, we aim to transform how students interact 
+                        with campus events, fostering a sense of belonging and community that extends beyond the classroom.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Key Features -->
+            <div class="about-features">
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <h4>Smart Event Discovery</h4>
+                    <p>Intelligent recommendation system that helps students find events tailored to their interests, schedule, and academic goals.</p>
+                </div>
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h4>Community Building</h4>
+                    <p>Foster meaningful connections between students, organizations, and faculty through shared interests and experiences.</p>
+                </div>
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>Analytics & Insights</h4>
+                    <p>Comprehensive analytics for organizers to understand event performance and student engagement patterns.</p>
+                </div>
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>Mobile-First Design</h4>
+                    <p>Responsive platform designed for modern students who are always on the go, accessible from any device.</p>
+                </div>
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>Secure & Reliable</h4>
+                    <p>Enterprise-grade security and reliability ensuring your data is protected and the platform is always available.</p>
+                </div>
+                <div class="about-feature">
+                    <div class="about-feature-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h4>Student-Centric</h4>
+                    <p>Every feature is designed with students in mind, prioritizing ease of use, accessibility, and meaningful engagement.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer style="background: var(--dark-color); color: var(--text-white); padding: var(--spacing-2xl) 0; text-align: center; margin-top: var(--spacing-2xl);">
+        <div class="container">
+            <div class="logo" style="color: var(--text-white); margin-bottom: var(--spacing-lg);">
+                StudentConnect
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: var(--spacing-lg);">
+                Connecting students, enriching experiences, building community.
+            </p>
+            <div style="display: flex; justify-content: center; gap: var(--spacing-lg); margin-bottom: var(--spacing-lg);">
+                <a href="#" style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem; transition: var(--transition-fast);">
+                    <i class="fab fa-facebook"></i>
+                </a>
+                <a href="#" style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem; transition: var(--transition-fast);">
+                    <i class="fab fa-twitter"></i>
+                </a>
+                <a href="#" style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem; transition: var(--transition-fast);">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="#" style="color: rgba(255, 255, 255, 0.7); font-size: 1.5rem; transition: var(--transition-fast);">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+            </div>
+            <p style="color: rgba(255, 255, 255, 0.5); font-size: 0.875rem;">
+                © 2025 StudentConnect. All rights reserved. Made with ❤️ for students, by students.
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Add active state to navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const navLinks = document.querySelectorAll('.nav-links a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+
+            // Animate statistics on scroll
+            const stats = document.querySelectorAll('.about-stat-number');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const target = entry.target;
+                        const finalValue = target.textContent;
+                        const numericValue = parseInt(finalValue.replace(/\D/g, ''));
+                        const suffix = finalValue.replace(/\d/g, '');
+                        
+                        let currentValue = 0;
+                        const increment = numericValue / 50;
+                        
+                        const timer = setInterval(() => {
+                            currentValue += increment;
+                            if (currentValue >= numericValue) {
+                                target.textContent = finalValue;
+                                clearInterval(timer);
+                            } else {
+                                target.textContent = Math.floor(currentValue) + suffix;
+                            }
+                        }, 30);
+                        
+                        observer.unobserve(target);
+                    }
+                });
+            });
+            
+            stats.forEach(stat => observer.observe(stat));
+        });
+
+        // Toggle between full and simple view
+        function toggleView() {
+            const fullView = document.getElementById('full-view');
+            const simpleView = document.getElementById('simple-view');
+            const toggleBtn = document.querySelector('.view-toggle');
+            
+            if (fullView.style.display === 'none') {
+                fullView.style.display = 'block';
+                simpleView.style.display = 'none';
+                toggleBtn.textContent = 'Switch to Simple View';
+            } else {
+                fullView.style.display = 'none';
+                simpleView.style.display = 'block';
+                toggleBtn.textContent = 'Switch to Full View';
+            }
+        }
+    </script>
+
+    <!-- Simple About View (Initially Hidden) -->
+    <div id="simple-view" class="simple-view">
+        <nav>
+            <a href="{% url 'landing' %}" class="nav-link">Home</a>
+            <a href="{% url 'login' %}" class="nav-link">Login</a>
+        </nav>
+        
+        <h1>About StudentConnect</h1>
+        
+        <p>Welcome to StudentConnect - your premier platform for discovering and managing campus events!</p>
+        
+        <p>Our mission is to bridge the gap between event organizers and students, creating a vibrant campus community where everyone can discover, participate in, and organize meaningful events.</p>
+        
+        <h2>What We Offer:</h2>
+        <ul>
+            <li><strong>Event Discovery:</strong> Find events that match your interests and schedule</li>
+            <li><strong>Easy Organization:</strong> Create and manage events with our intuitive tools</li>
+            <li><strong>Community Building:</strong> Connect with like-minded students and organizations</li>
+            <li><strong>Analytics:</strong> Track event performance and engagement</li>
+        </ul>
+        
+        <h2>Our Vision</h2>
+        <p>We envision a campus where every student has access to enriching experiences that complement their academic journey and help them build lasting connections.</p>
+        
+        <h2>Get Started</h2>
+        <p>Ready to join our community? <a href="{% url 'login' %}">Sign in</a> or create an account to start discovering amazing events!</p>
+    </div>
+
+</body>
+</html>

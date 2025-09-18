@@ -1,0 +1,693 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Dashboard | StudentConnect</title>
+    <link rel="stylesheet" href="{% static 'css/student.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+    
+    <!-- Add view toggle styles -->
+    <style>
+        .view-mode-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2000;
+            background: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        .view-mode-toggle:hover {
+            background: #0056b3;
+        }
+        .no-js-view {
+            display: none;
+            background: #f8f9fa;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 10px;
+            border: 2px solid #007bff;
+        }
+        .no-js-view.active {
+            display: block;
+        }
+        .full-view.hidden {
+            display: none;
+        }
+    </style>
+    
+    <script>
+        // CSRF token helper function
+        function getCSRFToken() {
+            return document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        }
+        
+        // Set CSRF token for all AJAX requests
+        document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = getCSRFToken();
+            if (window.jQuery) {
+                $.ajaxSetup({
+                    beforeSend: function(xhr, settings) {
+                        if (!this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrfToken);
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    <script>
+        // Simple and robust sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.getElementById('studentSidebar');
+            const mainContent = document.querySelector('.dashboard-main');
+            
+            if (sidebar) {
+                // Toggle collapsed class
+                sidebar.classList.toggle('collapsed');
+                
+                // Also toggle main content class if it exists
+                if (mainContent) {
+                    mainContent.classList.toggle('sidebar-collapsed');
+                }
+                
+                // Save state
+                const isCollapsed = sidebar.classList.contains('collapsed');
+                localStorage.setItem('sidebarCollapsed', isCollapsed.toString());
+            }
+        }
+        
+        // Alternative method using event listener
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find the toggle button and add click listener
+            const toggleButton = document.querySelector('.sidebar-toggle');
+            if (toggleButton) {
+                toggleButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
+        });
+        
+        // Restore sidebar state when page loads
+        window.addEventListener('load', function() {
+            const sidebar = document.getElementById('studentSidebar');
+            const mainContent = document.querySelector('.dashboard-main');
+            const savedState = localStorage.getItem('sidebarCollapsed');
+            
+            if (savedState === 'true' && sidebar) {
+                sidebar.classList.add('collapsed');
+                if (mainContent) {
+                    mainContent.classList.add('sidebar-collapsed');
+                }
+            }
+        });
+    </script>
+</head>
+<body data-theme="dark">
+    <!-- View Mode Toggle -->
+    <button class="view-mode-toggle" onclick="toggleViewMode()">
+        <i class="fas fa-code"></i> No-JS Mode
+    </button>
+
+    <!-- Full Interactive View -->
+    <div id="full-view" class="full-view">
+
+    <div id="dashboard-page" class="dashboard-page">
+        <aside class="sidebar" id="studentSidebar">
+            <div class="sidebar-header">
+                <div class="logo">Student<strong>Connect</strong></div>
+                <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li class="active" data-page="discover"><a href="#" title="Discover"><i class="fas fa-compass"></i><span>Discover</span></a></li>
+                    <li data-page="my-events"><a href="#" title="My Events"><i class="fas fa-calendar-check"></i><span>My Events</span></a></li>
+                    <li data-page="profile"><a href="#" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+                    <li><a href="{% url 'about' %}" title="About StudentConnect" target="_blank"><i class="fas fa-info-circle"></i><span>About</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {% if user.first_name %}{{ user.first_name.0 }}{% endif %}{% if user.last_name %}{{ user.last_name.0 }}{% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="user-role">Student</div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" title="Sign Out">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="dashboard-main">
+            <header class="dashboard-header">
+                <div class="header-left">
+                    <h2 id="greeting">Welcome,{{ user.first_name }}</h2>
+                    <p>Let's find your next big opportunity.</p>
+                </div>
+                <div class="header-right">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="search" id="search-bar" placeholder="Search events, workshops...">
+                    </div>
+                </div>
+            </header>
+            
+            <section id="discover-page" class="page-content">
+                <div class="filters">
+                    <h3>All Opportunities</h3>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-category="all">All</button>
+                        <button class="filter-btn" data-category="hackathon">Hackathons</button>
+                        <button class="filter-btn" data-category="workshop">Workshops</button>
+                        <button class="filter-btn" data-category="techevent">Tech Events</button>
+                        <button class="filter-btn" data-category="internship">Internships</button>
+                    </div>
+                </div>
+                <div id="event-grid" class="event-grid">
+                    {% if events and events.count > 0 %}
+                        {% for ev in events %}
+                            <div class="event-card {% if ev.is_featured %}featured-event{% endif %}" 
+                                 data-category="{{ ev.category }}"
+                                 style="{% if ev.color_theme %}border-left: 4px solid {{ ev.color_theme }};{% endif %}">
+                                
+                                {% if ev.event_flyer %}
+                                    <div class="event-image" style="background-image: url('{{ ev.event_flyer.url }}');"></div>
+                                {% elif ev.featured_image %}
+                                    <div class="event-image" style="background-image: url('{{ ev.featured_image }}');"></div>
+                                {% endif %}
+                                
+                                <div class="event-content">
+                                    <h4 class="event-title" {% if ev.color_theme %}style="color: {{ ev.color_theme }};"{% endif %}>
+                                        {{ ev.title }}
+                                        {% if ev.is_featured %}<span class="featured-badge">✨ Featured</span>{% endif %}
+                                    </h4>
+                                    <p class="event-category" style="display: none;">{{ ev.category }}</p>
+                                    <p class="event-date">📅 {{ ev.date }}</p>
+                                    <p class="event-time">🕐 {{ ev.time }}</p>
+                                    <p class="event-location">📍 {{ ev.location }}</p>
+                                    <p class="event-organizer">👤 Organized by: {{ ev.organizer.user.first_name|default:ev.organizer.user.username }}</p>
+                                    {% if ev.description %}
+                                        <p class="event-description">{{ ev.description|truncatewords:20 }}</p>
+                                    {% endif %}
+                                    <a href="{% url 'event_detail' ev.id %}" class="cta-button primary" 
+                                       {% if ev.color_theme %}style="background-color: {{ ev.color_theme }};"{% endif %}>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No approved events available at the moment. Check back later.</p>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section id="my-events-page" class="page-content hidden">
+                <h3>My Registered Events</h3>
+                <div class="my-events-container">
+                    <p>You haven't registered for any events yet. Bookmarked events will also appear here!</p>
+                </div>
+            </section>
+
+            <section id="profile-page" class="page-content hidden">
+                <h3>My Profile</h3>
+                <div class="profile-container">
+                    <div class="profile-content-wrapper">
+                        <div class="profile-avatar-section">
+                            <img src="{% if profile.avatar %}{{ profile.avatar.url }}{% else %}https://i.ibb.co/615b2D4/default-avatar.png{% endif %}" 
+                                alt="Profile Picture" 
+                                id="profile-picture-preview" 
+                                class="profile-avatar-large">
+                            <label for="profile-upload-input" class="upload-btn">
+                                <i class="fas fa-camera"></i> Upload Photo
+                            </label>
+                        </div>
+
+                        <div class="profile-details-section">
+                            <form method="POST" action="{% url 'save_profile' %}" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="info-field">
+                                <label for="profile-name-input">Full Name</label>
+                                <input type="text" id="profile-name-input" value="{{ user.first_name }}" readonly>
+                            </div>
+                            <div class="info-field">
+                                <label for="profile-email-input">Email Address</label>
+                                <input type="email" id="profile-email-input" value="{{ user.email }}" readonly>
+                            </div>
+                            <div class="info-field">
+                                <label for="profile-mobile-input">Mobile Number</label>
+                                <input type="tel" id="profile-mobile-input" name="contact_number"
+                                    value="{{ profile.contact_number|default:'' }}">
+                            </div>
+                            <input type="file" id="profile-upload-input" name="avatar" accept="image/*" class="hidden">
+                            <button type="submit" class="cta-button primary">Save Changes</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="event-details-page" class="page-content hidden">
+                <div class="details-header">
+                     <button class="back-link" id="back-to-discover"><i class="fas fa-arrow-left"></i> Back to Discover</button>
+                </div>
+                <div class="details-container">
+                    <div class="details-left">
+                        <h1 id="details-title"></h1>
+                        <img src="" alt="Event Image" class="details-image" id="details-image">
+                        <h2>About this Event</h2>
+                        <p id="details-description"></p>
+                        <h3>Key Topics Covered</h3>
+                        <ul class="topics-list" id="details-topics"></ul>
+                    </div>
+                    <div class="details-right">
+                        <div class="info-card">
+                            <h3>Event Details</h3>
+                            <p><i class="fas fa-calendar-alt"></i> <strong id="details-date"></strong></p>
+                            <p><i class="fas fa-clock"></i> <strong id="details-time"></strong></p>
+                            <p><i class="fas fa-map-marker-alt"></i> <strong id="details-mode"></strong></p>
+                            <p><i class="fas fa-rupee-sign"></i> <strong>Price:</strong> <span id="details-price"></span></p>
+                            <button class="cta-button primary full-width register-btn">Register Now</button>
+                        </div>
+                         <div class="info-card speaker-card">
+                            <h3>About the Speaker</h3>
+                            <div class="speaker-info">
+                                <img src="" alt="Speaker" class="speaker-avatar" id="details-speaker-avatar">
+                                <div>
+                                    <h4 id="details-speaker-name"></h4>
+                                    <p id="details-speaker-role"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+    
+    <script src="{% static 'js/student.js' %}"></script>
+    <script>
+        // Ensure logout works without confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find logout button and remove any onclick handlers
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                // Remove any existing onclick attribute
+                logoutBtn.removeAttribute('onclick');
+                // Override any global confirmLogout function
+                window.confirmLogout = undefined;
+            }
+        });
+
+        /*
+        ===================================
+        CSRF TOKEN UTILITY FUNCTIONS
+        ===================================
+        Helper functions for handling CSRF tokens in AJAX requests
+        */
+        
+        // Get CSRF token from meta tag or cookie
+        function getCSRFToken() {
+            // Try to get from meta tag first
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            if (metaToken) {
+                return metaToken.getAttribute('content');
+            }
+            
+            // Fallback to cookie method
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='));
+            return cookieValue ? cookieValue.split('=')[1] : null;
+        }
+        
+        // Setup CSRF headers for fetch requests
+        function getCSRFHeaders() {
+            const token = getCSRFToken();
+            return token ? {
+                'X-CSRFToken': token,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            } : {};
+        }
+
+        // Professional Auto-Refresh System - Modern Website Style
+        class ProfessionalAutoRefresh {
+            constructor() {
+                this.interval = null;
+                this.isUserActive = false;
+                this.lastActivity = Date.now();
+                this.refreshInterval = 30000; // Start with 30 seconds
+                this.maxInterval = 300000; // Max 5 minutes
+                this.minInterval = 15000; // Min 15 seconds
+                this.retryCount = 0;
+                this.maxRetries = 3;
+                
+                this.initializeActivityTracking();
+                this.initializeRefreshIndicator();
+                this.startAutoRefresh();
+            }
+            
+            initializeActivityTracking() {
+                // Track various user interactions
+                ['click', 'keydown', 'scroll', 'mousemove', 'touchstart'].forEach(event => {
+                    document.addEventListener(event, () => this.markUserActive(), { passive: true });
+                });
+                
+                // Track page visibility
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.pauseAutoRefresh();
+                    } else {
+                        this.resumeAutoRefresh();
+                        this.markUserActive();
+                    }
+                });
+                
+                // Track focus events
+                window.addEventListener('focus', () => this.markUserActive());
+                window.addEventListener('blur', () => this.pauseAutoRefresh());
+            }
+            
+            markUserActive() {
+                this.isUserActive = true;
+                this.lastActivity = Date.now();
+                this.adjustRefreshInterval();
+                
+                // Clear active state after 5 seconds
+                setTimeout(() => {
+                    this.isUserActive = false;
+                }, 5000);
+            }
+            
+            adjustRefreshInterval() {
+                // Adaptive intervals based on activity
+                const timeSinceActivity = Date.now() - this.lastActivity;
+                
+                if (timeSinceActivity < 60000) { // Very recent activity
+                    this.refreshInterval = this.minInterval;
+                } else if (timeSinceActivity < 300000) { // Recent activity
+                    this.refreshInterval = 60000; // 1 minute
+                } else { // Inactive user
+                    this.refreshInterval = Math.min(this.maxInterval, this.refreshInterval * 1.5);
+                }
+            }
+            
+            initializeRefreshIndicator() {
+                // Create professional refresh indicator
+                const indicator = document.createElement('div');
+                indicator.id = 'refresh-indicator';
+                indicator.innerHTML = `
+                    <div class="refresh-icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 4.466V2.534a.5.5 0 0 1 .854-.354l2.5 2.5a.5.5 0 0 1 0 .708l-2.5 2.5A.5.5 0 0 1 8 7.534V5.534A4.5 4.5 0 0 0 4 10a.5.5 0 0 1-1 0A5.5 5.5 0 0 1 8 4.466z"/>
+                        </svg>
+                    </div>
+                    <span class="refresh-text">Syncing...</span>
+                `;
+                
+                // Add professional styling
+                const style = document.createElement('style');
+                style.textContent = `
+                    #refresh-indicator {
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: rgba(255, 255, 255, 0.95);
+                        backdrop-filter: blur(10px);
+                        border: 1px solid rgba(0, 0, 0, 0.1);
+                        border-radius: 8px;
+                        padding: 8px 12px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        color: #666;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                        display: flex;
+                        align-items: center;
+                        gap: 6px;
+                        opacity: 0;
+                        transform: translateY(-10px);
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                        z-index: 1000;
+                        pointer-events: none;
+                    }
+                    
+                    #refresh-indicator.show {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                    
+                    #refresh-indicator.success {
+                        background: rgba(40, 167, 69, 0.95);
+                        color: white;
+                        border-color: rgba(40, 167, 69, 0.3);
+                    }
+                    
+                    #refresh-indicator.error {
+                        background: rgba(220, 53, 69, 0.95);
+                        color: white;
+                        border-color: rgba(220, 53, 69, 0.3);
+                    }
+                    
+                    #refresh-indicator .refresh-icon {
+                        display: flex;
+                        align-items: center;
+                    }
+                    
+                    #refresh-indicator .refresh-icon svg {
+                        animation: refresh-spin 1s linear infinite;
+                    }
+                    
+                    #refresh-indicator.success .refresh-icon svg,
+                    #refresh-indicator.error .refresh-icon svg {
+                        animation: none;
+                    }
+                    
+                    @keyframes refresh-spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    
+                    [data-theme="dark"] #refresh-indicator {
+                        background: rgba(30, 30, 30, 0.95);
+                        border-color: rgba(255, 255, 255, 0.1);
+                        color: #ccc;
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(indicator);
+                
+                this.indicator = indicator;
+            }
+            
+            showIndicator(type = 'syncing', message = 'Syncing...') {
+                if (!this.indicator) return;
+                
+                this.indicator.className = '';
+                this.indicator.classList.add('show');
+                
+                if (type !== 'syncing') {
+                    this.indicator.classList.add(type);
+                }
+                
+                this.indicator.querySelector('.refresh-text').textContent = message;
+                
+                if (type !== 'syncing') {
+                    setTimeout(() => {
+                        this.hideIndicator();
+                    }, 2000);
+                }
+            }
+            
+            hideIndicator() {
+                if (this.indicator) {
+                    this.indicator.classList.remove('show');
+                }
+            }
+            
+            async performRefresh() {
+                // Don't refresh if user is actively interacting
+                if (this.isUserActive || (Date.now() - this.lastActivity < 10000)) {
+                    return;
+                }
+                
+                this.showIndicator('syncing', 'Checking for updates...');
+                
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Cache-Control': 'no-cache'
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const newDoc = parser.parseFromString(html, 'text/html');
+                    
+                    let hasUpdates = false;
+                    
+                    // Smart update detection and DOM patching
+                    const sections = [
+                        { selector: '.events-grid', name: 'events' },
+                        { selector: '.stats-section', name: 'statistics' },
+                        { selector: '.notification-badge', name: 'notifications' }
+                    ];
+                    
+                    sections.forEach(section => {
+                        const current = document.querySelector(section.selector);
+                        const updated = newDoc.querySelector(section.selector);
+                        
+                        if (current && updated && current.innerHTML !== updated.innerHTML) {
+                            current.innerHTML = updated.innerHTML;
+                            hasUpdates = true;
+                        }
+                    });
+                    
+                    // Show appropriate feedback
+                    if (hasUpdates) {
+                        this.showIndicator('success', 'Updated successfully');
+                        this.retryCount = 0; // Reset retry count on success
+                    } else {
+                        this.hideIndicator();
+                    }
+                    
+                    console.log(`[${new Date().toLocaleTimeString()}] Dashboard sync completed - ${hasUpdates ? 'Updates found' : 'No changes'}`);
+                    
+                } catch (error) {
+                    console.warn('[Auto-refresh] Sync failed:', error.message);
+                    this.handleRefreshError();
+                }
+            }
+            
+            handleRefreshError() {
+                this.retryCount++;
+                
+                if (this.retryCount <= this.maxRetries) {
+                    this.showIndicator('error', `Sync failed, retrying... (${this.retryCount}/${this.maxRetries})`);
+                    
+                    // Exponential backoff for retries
+                    setTimeout(() => {
+                        this.performRefresh();
+                    }, Math.pow(2, this.retryCount) * 1000);
+                } else {
+                    this.showIndicator('error', 'Sync unavailable');
+                    // Increase interval after failures
+                    this.refreshInterval = Math.min(this.maxInterval, this.refreshInterval * 2);
+                    this.retryCount = 0;
+                }
+            }
+            
+            startAutoRefresh() {
+                this.interval = setInterval(() => {
+                    this.adjustRefreshInterval();
+                    this.performRefresh();
+                }, this.refreshInterval);
+            }
+            
+            pauseAutoRefresh() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                this.hideIndicator();
+            }
+            
+            resumeAutoRefresh() {
+                if (!this.interval) {
+                    this.startAutoRefresh();
+                }
+            }
+        }
+        
+        // Initialize professional auto-refresh system
+        const autoRefresh = new ProfessionalAutoRefresh();
+
+        // Toggle between full and no-JS view
+        function toggleViewMode() {
+            const fullView = document.getElementById('full-view');
+            const noJsView = document.getElementById('no-js-view');
+            const toggleBtn = document.querySelector('.view-mode-toggle');
+            
+            if (fullView.classList.contains('hidden')) {
+                fullView.classList.remove('hidden');
+                noJsView.classList.remove('active');
+                toggleBtn.innerHTML = '<i class="fas fa-code"></i> No-JS Mode';
+            } else {
+                fullView.classList.add('hidden');
+                noJsView.classList.add('active');
+                toggleBtn.innerHTML = '<i class="fas fa-magic"></i> Full Mode';
+            }
+        }
+    </script>
+
+    <!-- No-JavaScript Simple View -->
+    <div id="no-js-view" class="no-js-view">
+        <h2><i class="fas fa-graduation-cap"></i> Student Dashboard (No-JS Version)</h2>
+        <p><strong>User:</strong> {{ user.get_full_name|default:user.username }}</p>
+        <p><strong>Role:</strong> Student</p>
+        
+        <h3>Available Events</h3>
+        {% if events %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                {% for event in events %}
+                <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
+                    <h4>{{ event.title }}</h4>
+                    <p><strong>Date:</strong> {{ event.date }}</p>
+                    <p><strong>Time:</strong> {{ event.time }}</p>
+                    <p><strong>Location:</strong> {{ event.location }}</p>
+                    <p><strong>Category:</strong> {{ event.get_category_display }}</p>
+                    <p><strong>Status:</strong> <span style="color: {% if event.status == 'approved' %}green{% elif event.status == 'pending' %}orange{% else %}red{% endif %};">{{ event.get_status_display }}</span></p>
+                    {% if event.description %}
+                    <p><strong>Description:</strong> {{ event.description|truncatewords:20 }}</p>
+                    {% endif %}
+                    {% if event.event_link %}
+                    <a href="{{ event.event_link }}" target="_blank" style="color: #007bff;">Registration Link</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No events available at the moment.</p>
+        {% endif %}
+        
+        <div style="margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px;">
+            <h4>Navigation</h4>
+            <a href="{% url 'logout' %}" style="color: #dc3545; text-decoration: none; margin-right: 15px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            <a href="{% url 'about' %}" style="color: #007bff; text-decoration: none; margin-right: 15px;">
+                <i class="fas fa-info-circle"></i> About
+            </a>
+        </div>
+    </div>
+    
+    </div> <!-- Close full-view div -->
+
+</body>
+</html>

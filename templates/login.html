@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>StudentConnect | Login</title>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/student.css' %}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+</head>
+<body data-theme="light">
+
+  <!-- Background Hero Section -->
+  <div id="background-landing">
+    <section class="hero student-hero" style="background-image: url('{% static 'images/student-hero-bg.jpg' %}');">
+      <div class="container">
+        <div class="hero-content">
+          <h1>Connect to Your Future Career.</h1>
+          <p>StudentConnect is the ultimate platform for students to discover exclusive opportunities.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Login Popup -->
+  <div id="auth-page" class="modal-overlay active">
+    <div class="modal-content">
+      <span class="close-modal"><a href="{% url 'landing' %}">&times;</a></span>
+      
+      
+
+      <!-- Messages Display -->
+      {% if messages %}
+        <div class="messages-container">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+              <i class="fas {% if message.tags == 'error' %}fa-exclamation-triangle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
+              <span>{{ message }}</span>
+              <button type="button" class="close-alert" onclick="this.parentElement.style.display='none'">×</button>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <!-- Toggle buttons -->
+      <div class="form-toggle">
+        <button id="student-toggle" class="toggle-btn active">Student</button>
+        <button id="organizer-toggle" class="toggle-btn">Organizer</button>
+      </div>
+
+
+      <!-- ================= STUDENT FORMS ================= -->
+      <div id="student-forms" class="form-container">
+
+        <!-- Student Login -->
+        <form id="student-login-form" method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <h2>Student Login</h2>
+          <input type="email" id="student-login-email" name="email" placeholder="Email Address" required>
+          <div class="password-wrapper">
+            <input type="password" id="student-login-password" name="password" placeholder="Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <input type="hidden" name="user_type" value="student">
+          <button type="submit" class="cta-button primary full-width">Login to Dashboard</button>
+          <p>New here? <a href="#" id="show-signup">Create an Account</a></p>
+        </form>
+
+        <!-- Student Signup -->
+        <form id="signup-form" class="hidden" method="POST" action="{% url 'signup' %}">
+          {% csrf_token %}
+          <h2> Create Student Account</h2>
+          <input type="text" id="student-signup-name" name="name" placeholder="Full Name" value="{{ name|default:'' }}" required>
+          <input type="email" id="student-signup-email" name="email" placeholder="Email Address" value="{{ email|default:'' }}" required>
+          
+          <!-- Password Field -->
+          <div class="password-wrapper">
+            <input type="password" id="student-signup-password" name="password" placeholder="Create Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          
+          <!-- Confirm Password Field -->
+          <div class="password-wrapper">
+            <input type="password" id="student-signup-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          
+          <input type="hidden" name="user_type" value="student">
+          <button type="submit" class="cta-button primary full-width">Create Account</button>
+          <p>Already a member? <a href="#" id="show-login">Log In</a></p>
+        </form>
+      </div>
+
+      <!-- ================= ORGANIZER FORMS ================= -->
+      <div id="organizer-forms" class="form-container hidden">
+
+        <!-- ORGANIZER LOGIN -->
+        <form id="organizer-login-form" method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <h2>Organizer Login</h2>
+          <input type="email" name="email" placeholder="Organizer Email Address" required>
+          <input type="password" name="password" placeholder="Password" required>
+          <input type="hidden" name="user_type" value="organizer">
+          <button type="submit" class="cta-button primary full-width">Login to Organizer Portal</button>
+          
+          <div style="text-align: center; margin-top: 20px; padding: 15px; background: #f0f9ff; border: 2px solid #0ea5e9; border-radius: 8px;">
+            <h4 style="margin: 0 0 10px 0; color: #0369a1;">New Organizer?</h4>
+            <button type="button" onclick="window.location.href='{% url 'organizer_signup' %}'" style="display: inline-block; padding: 12px 25px; background: #0ea5e9; color: white; border: none; cursor: pointer; border-radius: 6px; font-weight: 600; font-size: 16px;">
+              Create Organizer Account →
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+    
+    
+    <style>
+    /* Enhanced toggle functionality */
+    #organizer-forms.hidden {
+        display: none !important;
+    }
+    
+    #student-forms.hidden {
+        display: none !important;
+    }
+    
+    #organizer-forms.show {
+        display: block !important;
+    }
+    
+    #student-forms.show {
+        display: block !important;
+    }
+    </style>
+    
+    <script>
+    // Simplified toggle functionality that definitely works
+    document.addEventListener('DOMContentLoaded', function() {
+        const studentToggle = document.getElementById('student-toggle');
+        const organizerToggle = document.getElementById('organizer-toggle');
+        const studentForms = document.getElementById('student-forms');
+        const organizerForms = document.getElementById('organizer-forms');
+        
+        console.log('Toggle elements found:', {
+            studentToggle: !!studentToggle,
+            organizerToggle: !!organizerToggle,
+            studentForms: !!studentForms,
+            organizerForms: !!organizerForms
+        });
+        
+        // Show organizer forms
+        function showOrganizer() {
+            console.log('Showing organizer forms');
+            if (studentForms) {
+                studentForms.classList.add('hidden');
+                studentForms.classList.remove('show');
+            }
+            if (organizerForms) {
+                organizerForms.classList.remove('hidden');
+                organizerForms.classList.add('show');
+            }
+            if (studentToggle) studentToggle.classList.remove('active');
+            if (organizerToggle) organizerToggle.classList.add('active');
+        }
+        
+        // Show student forms  
+        function showStudent() {
+            console.log('Showing student forms');
+            if (organizerForms) {
+                organizerForms.classList.add('hidden');
+                organizerForms.classList.remove('show');
+            }
+            if (studentForms) {
+                studentForms.classList.remove('hidden');
+                studentForms.classList.add('show');
+            }
+            if (organizerToggle) organizerToggle.classList.remove('active');
+            if (studentToggle) studentToggle.classList.add('active');
+        }
+        
+        // Add event listeners
+        if (organizerToggle) {
+            organizerToggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                showOrganizer();
+            });
+        }
+        
+        if (studentToggle) {
+            studentToggle.addEventListener('click', function(e) {
+                e.preventDefault(); 
+                showStudent();
+            });
+        }
+        
+        // Initialize - show student forms by default
+        showStudent();
+    });
+    </script>
+</body>
+</html>

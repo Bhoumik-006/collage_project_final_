@@ -1,0 +1,543 @@
+<!-- 
+=========================================
+STUDENTCONNECT LANDING PAGE
+=========================================
+
+This is the main landing page that welcomes visitors to StudentConnect.
+It features a modern hero section, feature showcase, and authentication system.
+
+Key Features:
+- Responsive hero section with animated background
+- Interactive navigation with mobile menu
+- Feature cards showcasing platform benefits
+- Dual authentication system (Student/Organizer)
+- Professional footer with links and social media
+- Modern animations and transitions
+
+Technology Stack:
+- Django templates with static file integration
+- CSS Grid and Flexbox for layouts
+- JavaScript for interactivity and animations
+- FontAwesome icons for visual elements
+- Google Fonts (Inter) for typography
+-->
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Meta tags for SEO and responsive design -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  
+  <!-- Page title and external resources -->
+  <title>StudentConnect | Unlock Your Future</title>
+  <link rel="stylesheet" href="{% static 'css/student.css' %}">
+  
+  <!-- Font optimization - Preconnect to Google Fonts for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for icons -->
+  <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+</head>
+<body data-theme="dark" class="landing-page">
+
+  <!-- Main welcome page container -->
+  <div id="welcome-page">
+    
+    <!-- 
+    ===================================
+    NAVIGATION HEADER
+    ===================================
+    Modern responsive navigation with:
+    - Brand logo and tagline
+    - Mobile hamburger menu
+    - Navigation links
+    - Call-to-action button
+    -->
+    <header class="main-header modern-header">
+      <div class="container">
+        <nav class="header-nav">
+          <!-- Brand logo section -->
+          <div class="logo modern-logo">
+            <div class="logo-icon">🎓</div>
+            <div class="logo-text">
+              <span class="brand-name">Student<strong>Connect</strong></span>
+              <span class="brand-tagline">Unlock Your Future</span>
+            </div>
+          </div>
+          
+          <!-- Mobile menu toggle button - Shows on mobile devices -->
+          <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          
+          <!-- Navigation Menu -->
+          <div class="nav-menu" id="navMenu">
+            <a href="#features" class="nav-link">Features</a>
+            <a href="{% url 'about' %}" class="nav-link">About</a>
+            <a href="#contact" class="nav-link">Contact</a>
+            <button id="joinBtn" class="cta-button primary glowing">
+              <i class="fas fa-rocket"></i>
+              <span>Join Now</span>
+            </button>
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Modern Hero Section with Animated Background -->
+      <section class="hero modern-hero">
+        <div class="hero-background">
+          <div class="animated-gradient"></div>
+          <div class="floating-elements">
+            <div class="float-element" style="--delay: 0s;">💼</div>
+            <div class="float-element" style="--delay: 2s;">🚀</div>
+            <div class="float-element" style="--delay: 4s;">💡</div>
+            <div class="float-element" style="--delay: 1s;">🎯</div>
+            <div class="float-element" style="--delay: 3s;">⭐</div>
+          </div>
+        </div>
+        
+        <div class="container">
+          <div class="hero-content modern-hero-content">
+            <div class="hero-text">
+              <div class="hero-badge">
+                <i class="fas fa-fire"></i>
+                <span>Join 10,000+ Students</span>
+              </div>
+              <h1 class="hero-title">
+                Connect to Your 
+                <span class="gradient-text">Future Career</span>
+              </h1>
+              <p class="hero-description">
+                The ultimate platform for ambitious students to discover exclusive internships, 
+                workshops, and hackathons. Build your skills, showcase your talent, and get 
+                noticed by top companies worldwide.
+              </p>
+              
+              <div class="hero-actions">
+                <button id="cta-join-btn" class="cta-button-large primary-gradient">
+                  <i class="fas fa-bolt"></i>
+                  <span>Start Your Journey</span>
+                  <div class="button-shine"></div>
+                </button>
+              </div>
+              
+              <div class="hero-stats">
+                <div class="stat-item">
+                  <div class="stat-number">10K+</div>
+                  <div class="stat-label">Active Students</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-number">500+</div>
+                  <div class="stat-label">Partner Companies</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="hero-visual">
+              <div class="hero-card floating">
+                <div class="card-header">
+                  <div class="card-title">Latest Opportunities</div>
+                  <div class="card-badge live">LIVE</div>
+                </div>
+                <div class="opportunity-list">
+                  <div class="opportunity-item">
+                    <div class="company-logo">🏢</div>
+                    <div class="opportunity-info">
+                      <div class="opportunity-title">Google Summer Internship</div>
+                      <div class="opportunity-meta">Software Engineering • Remote</div>
+                    </div>
+                    <div class="opportunity-status new">NEW</div>
+                  </div>
+                  <div class="opportunity-item">
+                    <div class="company-logo">🚀</div>
+                    <div class="opportunity-info">
+                      <div class="opportunity-title">Tech Hackathon 2024</div>
+                      <div class="opportunity-meta">48-hour Challenge • $50K Prize</div>
+                    </div>
+                    <div class="opportunity-status hot">HOT</div>
+                  </div>
+                  <div class="opportunity-item">
+                    <div class="company-logo">💼</div>
+                    <div class="opportunity-info">
+                      <div class="opportunity-title">AI Workshop Series</div>
+                      <div class="opportunity-meta">Machine Learning • Free</div>
+                    </div>
+                    <div class="opportunity-status">FEATURED</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Modern Features Section -->
+      <section class="features-section modern-features" id="features">
+        <div class="container">
+          <div class="section-header">
+            <div class="section-badge">
+              <i class="fas fa-star"></i>
+              <span>Why Choose Us</span>
+            </div>
+            <h2 class="section-title">Why Join <span class="gradient-text">StudentConnect</span>?</h2>
+            <p class="section-description">
+              Discover the platform that's transforming how students connect with opportunities
+            </p>
+          </div>
+          
+          <div class="features-grid modern-grid">
+            <div class="feature-card modern-card">
+              <div class="card-glow"></div>
+              <div class="feature-icon">
+                <i class="fas fa-compass"></i>
+              </div>
+              <h3>Discover Opportunities</h3>
+              <p>Access a curated list of top-tier hackathons, internships, and skill-building workshops from leading companies and organizations worldwide.</p>
+              <div class="feature-stats">
+                <div class="stat">500+ Active Listings</div>
+              </div>
+            </div>
+            
+            <div class="feature-card modern-card featured">
+              <div class="card-glow"></div>
+              <div class="feature-badge">Most Popular</div>
+              <div class="feature-icon">
+                <i class="fas fa-id-card"></i>
+              </div>
+              <h3>Showcase Your Skills</h3>
+              <p>Create a professional profile that highlights your projects, skills, and educational background to stand out to recruiters and hiring managers.</p>
+            </div>
+            
+            <div class="feature-card modern-card">
+              <div class="card-glow"></div>
+              <div class="feature-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <h3>Connect & Grow</h3>
+              <p>Join a vibrant community of fellow students and mentors. Network, collaborate on projects, and accelerate your career growth through meaningful connections.</p>
+              <div class="feature-stats">
+                <div class="stat">10K+ Community Members</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Additional Features Row -->
+          <div class="features-grid modern-grid secondary-features">
+            <div class="feature-card mini-card">
+              <div class="mini-icon"><i class="fas fa-shield-alt"></i></div>
+              <div class="mini-content">
+                <h4>Verified Companies</h4>
+                <p>All opportunities from trusted, verified organizations</p>
+              </div>
+            </div>
+            
+            <div class="feature-card mini-card">
+              <div class="mini-icon"><i class="fas fa-clock"></i></div>
+              <div class="mini-content">
+                <h4>Real-time Updates</h4>
+                <p>Get instant notifications for new matching opportunities</p>
+              </div>
+            </div>
+            
+            <div class="feature-card mini-card">
+              <div class="mini-icon"><i class="fas fa-trophy"></i></div>
+              <div class="mini-content">
+                <h4>Achievement System</h4>
+                <p>Earn badges and recognition for your accomplishments</p>
+              </div>
+            </div>
+            
+            <div class="feature-card mini-card">
+              <div class="mini-icon"><i class="fas fa-mobile-alt"></i></div>
+              <div class="mini-content">
+                <h4>Mobile Ready</h4>
+                <p>Access opportunities anywhere with our responsive design</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Modern Footer -->
+    <footer class="main-footer modern-footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-brand">
+            <div class="logo">
+              <div class="logo-icon">🎓</div>
+              <span class="brand-name">StudentConnect</span>
+            </div>
+            <p>Empowering the next generation of professionals through meaningful connections and opportunities.</p>
+            <div class="social-links">
+              <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+              <a href="#" class="social-link"><i class="fab fa-linkedin"></i></a>
+              <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+              <a href="#" class="social-link"><i class="fab fa-github"></i></a>
+            </div>
+          </div>
+          
+          <div class="footer-links">
+            <div class="link-group">
+              <h4>Platform</h4>
+              <a href="#">For Students</a>
+              <a href="#">For Organizers</a>
+              <a href="#">Success Stories</a>
+              <a href="#">Pricing</a>
+            </div>
+            
+            <div class="link-group">
+              <h4>Resources</h4>
+              <a href="#">Help Center</a>
+              <a href="#">Blog</a>
+              <a href="#">Career Guide</a>
+              <a href="#">API Docs</a>
+            </div>
+            
+            <div class="link-group">
+              <h4>Company</h4>
+              <a href="#">About Us</a>
+              <a href="#">Careers</a>
+              <a href="#">Press</a>
+              <a href="#">Contact</a>
+            </div>
+          </div>
+        </div>
+        
+        <div class="footer-bottom">
+          <div class="footer-bottom-left">
+            <p>&copy; 2025 StudentConnect. All rights reserved.</p>
+          </div>
+          <div class="footer-bottom-right">
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms of Service</a>
+            <a href="#">Cookie Policy</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- ================= AUTH MODAL ================= -->
+  <div id="auth-page" class="modal-overlay">
+    <div class="modal-content">
+      <span class="close-modal">&times;</span>
+
+      <!-- Toggle buttons -->
+      <div class="form-toggle">
+        <button id="student-toggle" class="toggle-btn active">Student</button>
+        <button id="organizer-toggle" class="toggle-btn">Organizer</button>
+      </div>
+
+      <!-- ================= STUDENT FORMS ================= -->
+      <div id="student-forms" class="form-container">
+
+        <!-- Student Login -->
+        <form id="student-login-form" method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <h2>Student Login</h2>
+          <input type="email" id="student-login-email" name="email" placeholder="Email Address" required>
+          <div class="password-wrapper">
+            <input type="password" id="student-login-password" name="password" placeholder="Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <input type="hidden" name="user_type" value="student">
+          <button type="submit" class="cta-button primary full-width">Login to Dashboard</button>
+          <p>New here? <a href="#" id="show-signup">Create an Account</a></p>
+        </form>
+
+        <!-- Student Signup -->
+        <form id="signup-form" class="hidden" method="POST" action="{% url 'signup' %}">
+          {% csrf_token %}
+          <h2> Create Student Account</h2>
+          <input type="text" id="student-signup-name" name="name" placeholder="Full Name" required>
+          <input type="email" id="student-signup-email" name="email" placeholder="Email Address" required>
+          <div class="password-wrapper">
+            <input type="password" id="student-signup-password" name="password" placeholder="Create Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <div class="password-wrapper">
+            <input type="password" id="student-signup-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <input type="hidden" name="user_type" value="student">
+          <button type="submit" class="cta-button primary full-width">Create Account</button>
+          <p>Already a member? <a href="#" id="show-login">Log In</a></p>
+        </form>
+      </div>
+
+      <!-- ================= ORGANIZER FORMS ================= -->
+      <div id="organizer-forms" class="form-container hidden">
+
+        <!-- Organizer Login -->
+        <form id="organizer-login-form" method="POST" action="{% url 'login' %}">
+          {% csrf_token %}
+          <h2>Organizer Login</h2>
+          <input type="email" id="organizer-login-email" name="email" placeholder="Organizer Email Address" required>
+          <div class="password-wrapper">
+            <input type="password" id="organizer-login-password" name="password" placeholder="Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <input type="hidden" name="user_type" value="organizer">
+          <button type="submit" class="cta-button primary full-width">Login to Organizer Portal</button>
+          <p>New here? <a href="#" id="show-organizer-signup">Create an Organizer Account</a></p>
+        </form>
+
+        <!-- Organizer Signup -->
+        <form id="organizer-signup-form" class="hidden" method="POST" action="{% url 'signup' %}">
+          {% csrf_token %}
+          <h2>Create Organizer Account</h2>
+          <input type="text" id="organizer-signup-name" name="name" placeholder="Organization Name" required>
+          <input type="email" id="organizer-signup-email" name="email" placeholder="Official Email Address" required>
+          <div class="password-wrapper">
+            <input type="password" id="organizer-signup-password" name="password" placeholder="Create Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <div class="password-wrapper">
+            <input type="password" id="organizer-signup-confirm-password" name="confirm_password" placeholder="Confirm Password" required>
+            <i class="fas fa-eye toggle-password"></i>
+          </div>
+          <input type="hidden" name="user_type" value="organizer">
+          <button type="submit" class="cta-button primary full-width">Create Account</button>
+          <p>Already an organizer? <a href="#" id="show-organizer-login">Log In</a></p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="{% static 'js/student.js' %}"></script>
+  <script>
+    // Modern Landing Page Functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      
+      // Mobile Menu Toggle
+      window.toggleMobileMenu = function() {
+        const navMenu = document.getElementById('navMenu');
+        const mobileToggle = document.querySelector('.mobile-menu-toggle');
+        
+        navMenu.classList.toggle('active');
+        mobileToggle.classList.toggle('active');
+        document.body.classList.toggle('menu-open');
+      };
+      
+      // Smooth Scrolling for Navigation Links (only for internal anchors)
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+          const href = this.getAttribute('href');
+          
+          // Only prevent default for internal anchor links (starting with #)
+          if (href && href.startsWith('#')) {
+            e.preventDefault();
+            const targetId = href.substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+              targetElement.scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+              });
+              
+              // Close mobile menu if open
+              const navMenu = document.getElementById('navMenu');
+              if (navMenu.classList.contains('active')) {
+                toggleMobileMenu();
+              }
+            }
+          }
+        });
+      });
+      
+      // Animated Elements on Scroll
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+      
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('animate-in');
+          }
+        });
+      }, observerOptions);
+      
+      // Observe elements for animation
+      document.querySelectorAll('.feature-card, .hero-visual, .section-header').forEach(el => {
+        observer.observe(el);
+      });
+      
+      // Parallax Effect for Hero Background
+      window.addEventListener('scroll', function() {
+        const scrolled = window.pageYOffset;
+        const rate = scrolled * -0.5;
+        const heroBackground = document.querySelector('.hero-background');
+        
+        if (heroBackground) {
+          heroBackground.style.transform = `translateY(${rate}px)`;
+        }
+      });
+      
+      // Add floating animation to elements
+      const floatingElements = document.querySelectorAll('.float-element');
+      floatingElements.forEach((element, index) => {
+        element.style.animationDelay = `${index * 0.5}s`;
+      });
+      
+      // Add glowing effect to cards on hover
+      document.querySelectorAll('.modern-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+          this.classList.add('glowing');
+        });
+        
+        card.addEventListener('mouseleave', function() {
+          this.classList.remove('glowing');
+        });
+      });
+      
+      // Dynamic stats counter animation
+      function animateCounters() {
+        const counters = document.querySelectorAll('.stat-number');
+        counters.forEach(counter => {
+          const target = parseInt(counter.textContent.replace(/[^\d]/g, ''));
+          const increment = target / 30;
+          let current = 0;
+          
+          const timer = setInterval(() => {
+            current += increment;
+            if (current >= target) {
+              counter.textContent = counter.textContent.replace(/\d+/, target);
+              clearInterval(timer);
+            } else {
+              counter.textContent = counter.textContent.replace(/\d+/, Math.floor(current));
+            }
+          }, 50);
+        });
+      }
+      
+      // Trigger counter animation when hero stats come into view
+      const statsObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCounters();
+            statsObserver.unobserve(entry.target);
+          }
+        });
+      });
+      
+      const heroStats = document.querySelector('.hero-stats');
+      if (heroStats) {
+        statsObserver.observe(heroStats);
+      }
+    });
+  </script>
+</body>
+</html>
