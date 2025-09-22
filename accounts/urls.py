@@ -23,6 +23,6 @@ urlpatterns = [
     path('events/<int:event_id>/', views.event_detail, name='event_detail'),
     path('events/<int:event_id>/deny/', views.deny_event_view, name='deny_event'),
     # Removed debug/test routes to keep production clean
-    path('organizer-signup/', views.organizer_signup, name='organizer_signup'),
+    path('organizer-signup/', views.organizer_signup, name='organizer_signup'),  # Redirects to unified signup
 ]
     

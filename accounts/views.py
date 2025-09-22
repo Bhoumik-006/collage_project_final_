@@ -88,11 +88,10 @@ def about(request):
 @csrf_protect
 def signup_view(request):
     """
-    Handle user registration for both students and organizers.
+    Handle unified user registration for the StudentConnect platform.
     
-    Processes POST requests to create new user accounts with
-    appropriate user profiles based on user type selection.
-    Includes password validation and error handling.
+    Creates a single user account that can access both student and organizer
+    functionalities. Users register once and can switch between roles seamlessly.
     
     Args:
         request: Django HttpRequest object containing form data
@@ -136,35 +135,21 @@ def signup_view(request):
 
         # Check if user already exists
         if User.objects.filter(username=email).exists():
-            existing_user = User.objects.get(username=email)
-            # Check if they already have this user type
-            if UserProfile.objects.filter(user=existing_user, user_type=user_type).exists():
-                messages.error(request, f"An account with this email already exists as a {user_type}. Please log in instead.")
-                return render(request, "login.html", {
-                    'email': email,
-                    'user_type': user_type
-                })
-            else:
-                # User exists but with different user type
-                messages.error(request, f"This email is already registered as a different user type. Please use a different email or log in with your existing account.")
-                return render(request, "login.html", {
-                    'show_signup': True,
-                    'name': name,
-                    'email': email,
-                    'user_type': user_type
-                })
+            messages.error(request, f"An account with this email already exists. Please log in instead.")
+            return render(request, "login.html", {
+                'email': email,
+                'user_type': user_type
+            })
 
-        # Create new user
+        # Create new unified user account
         try:
             user = User.objects.create_user(username=email, email=email, first_name=name, password=password)
-            # Create the requested profile
-            UserProfile.objects.create(user=user, user_type=user_type)
-            # If signing up as student, also create organizer profile for dual role functionality
-            if user_type == "student":
-                UserProfile.objects.create(user=user, user_type="organizer")
-                messages.success(request, "Account created successfully! Welcome to StudentConnect. You can now login as both Student and Organizer with this email.")
-            else:
-                messages.success(request, f"Account created successfully! Welcome to StudentConnect. Please log in with your new {user_type} account.")
+            
+            # Create BOTH student and organizer profiles for unified access
+            UserProfile.objects.create(user=user, user_type="student")
+            UserProfile.objects.create(user=user, user_type="organizer")
+            
+            messages.success(request, "Account created successfully! Welcome to StudentConnect. You can now access both Student and Organizer features with this single account.")
             return render(request, "login.html", {
                 'email': email,
                 'user_type': user_type
@@ -180,13 +165,17 @@ def signup_view(request):
 
     return redirect("login")
 
-    return render(request, "login.html")
-
 
 
 
 @csrf_protect
 def login_view(request):
+    """
+    Handle unified login for StudentConnect platform.
+    
+    Users can login with a single email and access both student and organizer
+    functionalities. The system automatically creates missing profiles if needed.
+    """
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
@@ -208,34 +197,33 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
-            # Check if a profile exists for the requested user_type
-            try:
-                profile = UserProfile.objects.get(user=user, user_type=user_type)
-                login(request, user)
-                if profile.user_type == "student":
-                    return redirect("student-dashboard")
-                elif profile.user_type == "organizer":
-                    return redirect("organizer-dashboard")
-            except UserProfile.DoesNotExist:
-                # Special case: If trying to login as organizer but have student profile, create organizer profile
-                if user_type == "organizer":
-                    try:
-                        student_profile = UserProfile.objects.get(user=user, user_type="student")
-                        # Create organizer profile for this user
-                        UserProfile.objects.create(user=user, user_type="organizer")
-                        login(request, user)
-                        messages.success(request, "Welcome! Your organizer account has been created. You can now access organizer features.")
-                        return redirect("organizer-dashboard")
-                    except UserProfile.DoesNotExist:
-                        pass  # Fall through to error message
-                messages.error(request, f"You don't have a {user_type} account. You may have registered as a different user type. Please check your account type or sign up as a {user_type}.")
-                return render(request, "login.html", {
-                    'show_signup': True,
-                    'email': email,
-                    'user_type': user_type
-                })
+            # Ensure both profiles exist for unified access
+            student_profile, student_created = UserProfile.objects.get_or_create(
+                user=user, 
+                user_type="student"
+            )
+            organizer_profile, organizer_created = UserProfile.objects.get_or_create(
+                user=user, 
+                user_type="organizer"
+            )
+            
+            # Log the user in
+            login(request, user)
+            
+            # Show welcome message if new profiles were created
+            if student_created or organizer_created:
+                messages.success(request, "Welcome! Your account now has access to both Student and Organizer features.")
+            
+            # Redirect based on requested user type
+            if user_type == "student":
+                return redirect("student-dashboard")
+            elif user_type == "organizer":
+                return redirect("organizer-dashboard")
+            else:
+                # Default to student dashboard if no type specified
+                return redirect("student-dashboard")
         else:
-            # Wrong password or email
+            # Wrong password
             messages.error(request, "Incorrect email or password. Please check your credentials and try again.")
             return render(request, "login.html", {
                 'email': email,
@@ -450,10 +438,10 @@ def create_event(request):
                 organizer_profile = request.user.profiles.get(user_type='organizer')
                 event = form.save(commit=False)
                 event.organizer = organizer_profile
-                # Save status from form cleaned data
-                event.status = form.cleaned_data.get('status', 'pending')
+                # Always set status to pending - only admins can approve events
+                event.status = 'pending'
                 event.save()
-                messages.success(request, 'Event created successfully!')
+                messages.success(request, 'Event created successfully and submitted for admin approval!')
                 return redirect('organizer-dashboard')
             except UserProfile.DoesNotExist:
                 messages.error(request, 'You must have an organizer profile to create events.')
@@ -657,79 +645,17 @@ def url_test(request):
 @csrf_protect
 def organizer_signup(request):
     """
-    Handle organizer registration with proper validation.
+    Redirect to unified signup system.
     
-    Fields:
-    - Organization Name (name)
-    - Official Email Address (email)
-    - Create Password (password)
-    - Confirm Password (confirm_password)
+    The organizer signup functionality has been integrated into the main
+    signup process. All users now get both student and organizer profiles
+    automatically, providing unified access to all platform features.
     """
-    if request.method == 'POST':
-        # Get form data
-        name = request.POST.get('name', '').strip()
-        email = request.POST.get('email', '').strip()
-        password = request.POST.get('password', '')
-        confirm_password = request.POST.get('confirm_password', '')
-        user_type = 'organizer'
-        
-        # Validation
-        if not all([name, email, password, confirm_password]):
-            messages.error(request, 'All fields are required.')
-            return render(request, 'organizer_signup.html', {
-                'name': name,
-                'email': email
-            })
-        
-        # Password confirmation validation
-        if password != confirm_password:
-            messages.error(request, 'Passwords do not match.')
-            return render(request, 'organizer_signup.html', {
-                'name': name,
-                'email': email
-            })
-        
-        # Password strength validation
-        if len(password) < 8:
-            messages.error(request, 'Password must be at least 8 characters long.')
-            return render(request, 'organizer_signup.html', {
-                'name': name,
-                'email': email
-            })
-        
-        # Check if user already exists
-        if User.objects.filter(username=email).exists():
-            messages.error(request, 'An account with this email already exists.')
-            return render(request, 'organizer_signup.html', {
-                'name': name,
-                'email': email
-            })
-        
-        try:
-            # Create user
-            user = User.objects.create_user(
-                username=email,
-                email=email,
-                first_name=name,
-                password=password
-            )
-            
-            # Create user profile
-            UserProfile.objects.create(
-                user=user,
-                user_type=user_type
-            )
-            
-            messages.success(request, 'Organizer account created successfully! You can now login.')
-            return redirect('login')
-            
-        except Exception as e:
-            messages.error(request, f'Error creating account: {str(e)}')
-            return render(request, 'organizer_signup.html', {
-                'name': name,
-                'email': email
-            })
-    
-    return render(request, 'organizer_signup.html')
+    # Redirect to main login/signup page with organizer pre-selected
+    messages.info(request, 'Use the main signup form to create your account. You\'ll get access to both Student and Organizer features automatically!')
+    return render(request, 'login.html', {
+        'auto_select_organizer': True,
+        'show_signup': True
+    })
 
 

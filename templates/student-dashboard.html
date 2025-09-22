@@ -46,6 +46,113 @@
         .full-view.hidden {
             display: none;
         }
+        
+        /* Role Switcher Styles */
+        .user-role-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .current-role {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .current-role i {
+            font-size: 11px;
+        }
+        
+        .role-dropdown {
+            position: relative;
+        }
+        
+        .role-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .role-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .role-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .role-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(2px);
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .role-option:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .role-option.current {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            cursor: default;
+        }
+        
+        .role-option i {
+            font-size: 12px;
+            width: 14px;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .user-role-switcher {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .role-options {
+                right: auto;
+                left: 0;
+            }
+        }
     </style>
     
     <script>
@@ -65,6 +172,32 @@
                         }
                     }
                 });
+            }
+        });
+        
+        // Role Switcher Functionality
+        function toggleRoleDropdown() {
+            const dropdown = document.getElementById('roleDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const roleDropdown = document.getElementById('roleDropdown');
+            const roleToggleBtn = document.querySelector('.role-toggle-btn');
+            
+            if (roleDropdown && !roleDropdown.contains(event.target) && event.target !== roleToggleBtn) {
+                roleDropdown.classList.remove('show');
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dropdown = document.getElementById('roleDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
             }
         });
     </script>
@@ -148,7 +281,27 @@
                     </div>
                     <div class="user-info">
                         <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
-                        <div class="user-role">Student</div>
+                        <div class="user-role-switcher">
+                            <div class="current-role">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Student</span>
+                            </div>
+                            <div class="role-dropdown">
+                                <button type="button" class="role-toggle-btn" onclick="toggleRoleDropdown()">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <div class="role-options" id="roleDropdown">
+                                    <div class="role-option current">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Student (Current)</span>
+                                    </div>
+                                    <a href="{% url 'organizer-dashboard' %}" class="role-option">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>Switch to Organizer</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <form method="post" action="{% url 'logout' %}">

@@ -10,20 +10,10 @@ class EventForm(forms.ModelForm):
         }),
         help_text='Registration link or event website is mandatory'
     )
-
-    status = forms.ChoiceField(
-        choices=Event.STATUS_CHOICES,
-        required=True,
-        widget=forms.Select(attrs={
-            'class': 'form-control status-dropdown',
-            'style': 'min-width: 200px; padding: 8px 12px; font-size: 14px; border-radius: 6px;'
-        }),
-        help_text='Approval status of the event'
-    )
     
     class Meta:
         model = Event
-        fields = ['title', 'description', 'category', 'date', 'time', 'location', 'event_flyer', 'event_link', 'status']
+        fields = ['title', 'description', 'category', 'date', 'time', 'location', 'event_flyer', 'event_link']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
             'time': forms.TimeInput(attrs={'type': 'time'}),
