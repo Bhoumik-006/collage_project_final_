@@ -22,6 +22,14 @@ class EventAdminForm(forms.ModelForm):
                 'class': 'form-control status-dropdown',
                 'style': 'min-width: 250px; width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 6px; border: 2px solid #ddd; background-color: #fff; color: #333; line-height: 1.5; box-sizing: border-box; overflow: visible; z-index: 999;'
             }),
+            'category': forms.Select(attrs={
+                'class': 'form-control category-dropdown',
+                'style': 'min-width: 300px; width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 6px; border: 2px solid #007cba; background-color: #fff; color: #333; line-height: 1.5; box-sizing: border-box; overflow: visible; z-index: 999;'
+            }),
+            'organizer': forms.Select(attrs={
+                'class': 'form-control organizer-dropdown',
+                'style': 'min-width: 300px; width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 6px; border: 2px solid #007cba; background-color: #fff; color: #333; line-height: 1.5; box-sizing: border-box; overflow: visible; z-index: 999;'
+            }),
             'denial_reason': forms.Textarea(attrs={
                 'class': 'form-control',
                 'style': 'min-width: 400px; min-height: 100px; padding: 10px; font-size: 14px; border-radius: 6px;',
