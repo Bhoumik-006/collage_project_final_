@@ -137,14 +137,6 @@
                             <input type="url" id="event-link" name="event_link" placeholder="https://example.com/register" value="{{ event.registration_link }}" required />
                             <small class="form-help">Registration link or event website is mandatory for all events</small>
                          </div>
-                         <div class="form-group">
-                            <label for="event-status">Approval Status</label>
-                            <select id="event-status" name="status">
-                                <option value="pending" {% if event.status == 'pending' %}selected{% endif %}>Pending</option>
-                                <option value="approved" {% if event.status == 'approved' %}selected{% endif %}>Approved</option>
-                                <option value="denied" {% if event.status == 'denied' %}selected{% endif %}>Denied</option>
-                            </select>
-                         </div>
                     </div>
                     <div class="form-navigation">
                         <button type="button" id="prevBtn" class="cta-button secondary hidden">Previous</button>

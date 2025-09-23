@@ -528,8 +528,8 @@ def edit_event(request, event_id):
         form = EventForm(request.POST, request.FILES, instance=event)
         if form.is_valid():
             event = form.save(commit=False)
-            # Save status from form cleaned data
-            event.status = form.cleaned_data.get('status', event.status)
+            # Preserve existing status - organizers cannot change approval status
+            # Status can only be changed by admins through the admin panel
             event.save()
             messages.success(request, f'Event "{event.title}" has been updated successfully!')
             return redirect('organizer-dashboard')
