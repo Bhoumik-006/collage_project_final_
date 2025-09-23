@@ -20,7 +20,7 @@ class EventAdminForm(forms.ModelForm):
         widgets = {
             'status': forms.Select(attrs={
                 'class': 'form-control status-dropdown',
-                'style': 'min-width: 200px; padding: 8px 12px; font-size: 14px; border-radius: 6px;'
+                'style': 'min-width: 250px; width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 6px; border: 2px solid #ddd; background-color: #fff; color: #333; line-height: 1.5; box-sizing: border-box; overflow: visible; z-index: 999;'
             }),
             'denial_reason': forms.Textarea(attrs={
                 'class': 'form-control',
@@ -141,12 +141,11 @@ class EventAdmin(admin.ModelAdmin):
     readonly_fields = ('image_preview_large', 'featured_image_preview', 'submission_info')
     list_per_page = 25
     
-    # Remove custom CSS to use default Django admin styling
-    # class Media:
-    #     css = {
-    #         'all': ('admin/css/custom_admin.css?v=2.0',)
-    #     }
-    #     js = ('admin/js/custom_admin.js',)
+    # Add custom CSS to fix dropdown visibility issues
+    class Media:
+        css = {
+            'all': ('admin/css/custom_admin.css',)
+        }
 
     fieldsets = (
         ('📝 Event Information', {
