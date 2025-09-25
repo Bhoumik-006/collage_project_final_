@@ -11,6 +11,99 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
     <style>
+        /* Role Switcher Styles */
+        .user-role-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .current-role {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .current-role i {
+            font-size: 11px;
+        }
+        
+        .role-dropdown {
+            position: relative;
+        }
+        
+        .role-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .role-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .role-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .role-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(2px);
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .role-option:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .role-option.current {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            cursor: default;
+        }
+        
+        .role-option i {
+            font-size: 12px;
+            width: 14px;
+        }
+        
         /* Fix any sidebar glitches */
         .sidebar-nav ul li a {
             display: flex;
@@ -54,24 +147,81 @@
             border: 2px solid #ddd;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .user-role-switcher {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .role-options {
+                right: auto;
+                left: 0;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div id="dashboard-page">
         <aside class="sidebar">
-            <div class="logo">S<strong>C</strong> | Org</div>
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <div class="logo-icon">🎓</div>
+                    <div class="logo-text">
+                        <div class="brand-name">StudentConnect</div>
+                        <div class="brand-tagline">Edit Event</div>
+                    </div>
+                </a>
+            </div>
             <nav class="sidebar-nav">
-                <ul>
-                    <li><a href="#" onclick="goToDashboard()" title="Dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
-                    <li><a href="#" onclick="goToCreateEvent()" title="Create Event"><i class="fas fa-plus-circle"></i><span>Create Event</span></a></li>
-                    <li><a href="#" onclick="goToProfile()" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
-                </ul>
+                <div class="nav-group">
+                    <ul>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Create Event"><i class="fas fa-plus-circle"></i><span>Create Event</span></a></li>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+                        <li><a href="{% url 'about' %}" title="About StudentConnect" target="_blank"><i class="fas fa-info-circle"></i><span>About</span></a></li>
+                    </ul>
+                </div>
             </nav>
             <div class="sidebar-footer">
-                <form method="post" action="{% url 'logout' %}" id="logout-form">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {% if user.first_name %}{{ user.first_name.0 }}{% endif %}{% if user.last_name %}{{ user.last_name.0 }}{% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="user-role-switcher">
+                            <div class="current-role">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Event Organizer</span>
+                            </div>
+                            <div class="role-dropdown">
+                                <button type="button" class="role-toggle-btn" onclick="toggleRoleDropdown()">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <div class="role-options" id="roleDropdown">
+                                    <a href="{% url 'student-dashboard' %}" class="role-option">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Switch to Student</span>
+                                    </a>
+                                    <div class="role-option current">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>Organizer (Current)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'logout' %}">
                     {% csrf_token %}
-                    <button type="button" id="logoutBtn" onclick="confirmLogout()" title="Logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></button>
+                    <button type="submit" class="logout-btn" title="Sign Out">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    </button>
                 </form>
             </div>
         </aside>
@@ -236,43 +386,30 @@
             }
         });
 
-        // Sidebar navigation functions
-        function goToDashboard() {
-            // Clear any existing navigation flags to show default dashboard view
-            localStorage.removeItem('showCreateEvent');
-            localStorage.removeItem('showProfile');
-            window.location.href = "{% url 'organizer-dashboard' %}";
+        // Role Switcher Functionality
+        function toggleRoleDropdown() {
+            const dropdown = document.getElementById('roleDropdown');
+            dropdown.classList.toggle('show');
         }
-
-        function goToCreateEvent() {
-            window.location.href = "{% url 'organizer-dashboard' %}";
-            // After redirect, we'll need to trigger the create event view
-            setTimeout(function() {
-                localStorage.setItem('showCreateEvent', 'true');
-            }, 100);
-        }
-
-        function goToProfile() {
-            window.location.href = "{% url 'organizer-dashboard' %}";
-            // After redirect, we'll need to trigger the profile view
-            setTimeout(function() {
-                localStorage.setItem('showProfile', 'true');
-            }, 100);
-        }
-
-        // Global logout confirmation function
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                const logoutForm = document.getElementById('logout-form');
-                if (logoutForm) {
-                    logoutForm.submit();
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const roleDropdown = document.getElementById('roleDropdown');
+            const roleToggleBtn = document.querySelector('.role-toggle-btn');
+            
+            if (roleDropdown && !roleDropdown.contains(event.target) && event.target !== roleToggleBtn) {
+                roleDropdown.classList.remove('show');
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dropdown = document.getElementById('roleDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
                 }
             }
-        }
-
-        // Prevent back button from triggering logout
-        window.addEventListener('beforeunload', function(e) {
-            return undefined;
         });
     </script>
 </body>
