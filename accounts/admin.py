@@ -146,7 +146,7 @@ class EventAdmin(admin.ModelAdmin):
     search_fields = ('title', 'description', 'organizer__user__username', 'organizer__user__email')
     actions = ['approve_events', 'deny_events', 'delete_events', 'feature_events', 'bulk_approve_pending']
     ordering = ('-date', 'status')
-    readonly_fields = ('image_preview_large', 'featured_image_preview', 'submission_info')
+    readonly_fields = ('image_preview_large', 'submission_info')
     list_per_page = 25
     
     # Add custom CSS to fix dropdown visibility issues
@@ -164,25 +164,13 @@ class EventAdmin(admin.ModelAdmin):
             'classes': ('wide',),
             'description': 'Event flyer uploaded by organizer and registration link.'
         }),
-        ('🔗 Additional Details', {
-            'fields': ('contact_email', 'additional_details', 'requirements', 'prizes'),
-            'classes': ('wide',),
-            'description': 'Optional additional information to help students understand the event better.'
-        }),
+
         ('✅ Approval Status', {
             'fields': ('status', 'denial_reason', 'submission_info'),
             'classes': ('wide',),
         }),
-        ('🗑️ Deletion Tracking', {
-            'fields': ('deleted_at', 'deleted_by'),
-            'classes': ('collapse',),
-            'description': 'Tracks when and by whom the event was deleted.'
-        }),
-        ('🎨 Auto-Styling (Applied on Approval)', {
-            'fields': ('featured_image', 'featured_image_preview', 'color_theme', 'styling_applied', 'is_featured'),
-            'classes': ('collapse',),
-            'description': 'These fields are automatically filled when an event is approved.'
-        }),
+
+
     )
 
     def get_urls(self):

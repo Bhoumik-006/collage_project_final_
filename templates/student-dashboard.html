@@ -14,38 +14,7 @@
     
     <!-- Add view toggle styles -->
     <style>
-        .view-mode-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2000;
-            background: #007bff;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-        .view-mode-toggle:hover {
-            background: #0056b3;
-        }
-        .no-js-view {
-            display: none;
-            background: #f8f9fa;
-            padding: 20px;
-            margin: 20px;
-            border-radius: 10px;
-            border: 2px solid #007bff;
-        }
-        .no-js-view.active {
-            display: block;
-        }
-        .full-view.hidden {
-            display: none;
-        }
+        /* Student dashboard specific styles */
         
         /* Role Switcher Styles */
         .user-role-switcher {
@@ -250,13 +219,7 @@
     </script>
 </head>
 <body data-theme="dark">
-    <!-- View Mode Toggle -->
-    <button class="view-mode-toggle" onclick="toggleViewMode()">
-        <i class="fas fa-code"></i> No-JS Mode
-    </button>
-
     <!-- Full Interactive View -->
-    <div id="full-view" class="full-view">
 
     <div id="dashboard-page" class="dashboard-page">
         <aside class="sidebar" id="studentSidebar">
@@ -781,65 +744,9 @@
         // Initialize professional auto-refresh system
         const autoRefresh = new ProfessionalAutoRefresh();
 
-        // Toggle between full and no-JS view
-        function toggleViewMode() {
-            const fullView = document.getElementById('full-view');
-            const noJsView = document.getElementById('no-js-view');
-            const toggleBtn = document.querySelector('.view-mode-toggle');
-            
-            if (fullView.classList.contains('hidden')) {
-                fullView.classList.remove('hidden');
-                noJsView.classList.remove('active');
-                toggleBtn.innerHTML = '<i class="fas fa-code"></i> No-JS Mode';
-            } else {
-                fullView.classList.add('hidden');
-                noJsView.classList.add('active');
-                toggleBtn.innerHTML = '<i class="fas fa-magic"></i> Full Mode';
-            }
-        }
+        // Student dashboard JavaScript functionality
     </script>
 
-    <!-- No-JavaScript Simple View -->
-    <div id="no-js-view" class="no-js-view">
-        <h2><i class="fas fa-graduation-cap"></i> Student Dashboard (No-JS Version)</h2>
-        <p><strong>User:</strong> {{ user.get_full_name|default:user.username }}</p>
-        <p><strong>Role:</strong> Student</p>
-        
-        <h3>Available Events</h3>
-        {% if events %}
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
-                {% for event in events %}
-                <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; background: white;">
-                    <h4>{{ event.title }}</h4>
-                    <p><strong>Date:</strong> {{ event.date }}</p>
-                    <p><strong>Time:</strong> {{ event.time }}</p>
-                    <p><strong>Location:</strong> {{ event.location }}</p>
-                    <p><strong>Category:</strong> {{ event.get_category_display }}</p>
-                    <p><strong>Status:</strong> <span style="color: {% if event.status == 'approved' %}green{% elif event.status == 'pending' %}orange{% else %}red{% endif %};">{{ event.get_status_display }}</span></p>
-                    {% if event.description %}
-                    <p><strong>Description:</strong> {{ event.description|truncatewords:20 }}</p>
-                    {% endif %}
-                    {% if event.event_link %}
-                    <a href="{{ event.event_link }}" target="_blank" style="color: #007bff;">Registration Link</a>
-                    {% endif %}
-                </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>No events available at the moment.</p>
-        {% endif %}
-        
-        <div style="margin-top: 30px; padding: 15px; background: #e9ecef; border-radius: 5px;">
-            <h4>Navigation</h4>
-            <a href="{% url 'logout' %}" style="color: #dc3545; text-decoration: none; margin-right: 15px;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
-            <a href="{% url 'about' %}" style="color: #007bff; text-decoration: none; margin-right: 15px;">
-                <i class="fas fa-info-circle"></i> About
-            </a>
-        </div>
-    </div>
-    
     </div> <!-- Close full-view div -->
 
 </body>
