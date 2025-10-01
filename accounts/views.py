@@ -197,15 +197,20 @@ def login_view(request):
         user = authenticate(request, username=email, password=password)
 
         if user is not None:
-            # Ensure both profiles exist for unified access
-            student_profile, student_created = UserProfile.objects.get_or_create(
-                user=user, 
-                user_type="student"
-            )
-            organizer_profile, organizer_created = UserProfile.objects.get_or_create(
-                user=user, 
-                user_type="organizer"
-            )
+            # Ensure both profiles exist for unified access (safe approach)
+            student_profile = UserProfile.objects.filter(user=user, user_type="student").first()
+            if not student_profile:
+                student_profile = UserProfile.objects.create(user=user, user_type="student")
+                student_created = True
+            else:
+                student_created = False
+                
+            organizer_profile = UserProfile.objects.filter(user=user, user_type="organizer").first()
+            if not organizer_profile:
+                organizer_profile = UserProfile.objects.create(user=user, user_type="organizer") 
+                organizer_created = True
+            else:
+                organizer_created = False
             
             # Log the user in
             login(request, user)
@@ -382,7 +387,14 @@ def refresh_csrf_token(request):
 @login_required
 @ensure_csrf_cookie
 def student_dashboard(request):
-    profile, _ = UserProfile.objects.get_or_create(user=request.user , user_type="student")
+    # Get or create profile, handling potential duplicates
+    try:
+        profile = UserProfile.objects.filter(user=request.user, user_type="student").first()
+        if not profile:
+            profile = UserProfile.objects.create(user=request.user, user_type="student")
+    except Exception:
+        profile = UserProfile.objects.create(user=request.user, user_type="student")
+    
     # Only show approved events to students that are not deleted
     approved_events = Event.objects.filter(status='approved', deleted_at__isnull=True).order_by('-date', '-time')
     
@@ -458,7 +470,21 @@ def create_event(request):
 @csrf_protect
 def save_profile(request):
     if request.method == "POST":
-        profile, created = UserProfile.objects.get_or_create(user=request.user)
+        try:
+            # Try to get the user profile, handling multiple objects
+            profile = UserProfile.objects.filter(user=request.user).first()
+            if not profile:
+                # Create a new profile if none exists
+                profile = UserProfile.objects.create(user=request.user)
+            else:
+                # Clean up any duplicate profiles for this user
+                duplicate_profiles = UserProfile.objects.filter(user=request.user).exclude(id=profile.id)
+                if duplicate_profiles.exists():
+                    duplicate_profiles.delete()
+
+        except Exception as e:
+            messages.error(request, "Error accessing profile. Please try again.")
+            return redirect("landing")
 
         # Save contact number
         contact_number = request.POST.get("contact_number")

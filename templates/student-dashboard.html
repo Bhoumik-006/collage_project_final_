@@ -14,6 +14,469 @@
     
     <!-- Add view toggle styles -->
     <style>
+        /* FORCE Rectangle bookmark button styling - HIGHEST PRIORITY */
+        button.bookmark-btn[data-event-id] {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: none !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            padding: 8px 12px !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            font-size: 16px !important;
+            width: auto !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+            min-width: 80px !important;
+        }
+
+        /* Remove the triangle pseudo-element */
+        button.bookmark-btn[data-event-id]::after {
+            display: none !important;
+        }
+
+        button.bookmark-btn[data-event-id]:hover {
+            background: rgba(0, 0, 0, 0.5) !important;
+            color: #ffffff !important;
+            transform: translateY(-2px) scale(1.05) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        button.bookmark-btn[data-event-id].bookmarked {
+            background: linear-gradient(135deg, #e91e63, #f06292) !important;
+            color: white !important;
+            box-shadow: 0 4px 20px rgba(233, 30, 99, 0.5) !important;
+            border: none !important;
+            animation: bookmarkSuccess 0.5s ease-out !important;
+        }
+
+        button.bookmark-btn[data-event-id].bookmarked:hover {
+            background: linear-gradient(135deg, #ad1457, #e91e63) !important;
+            transform: translateY(-2px) scale(1.05) !important;
+            box-shadow: 0 6px 25px rgba(233, 30, 99, 0.6) !important;
+        }
+
+        @keyframes bookmarkSuccess {
+            0% { 
+                background: rgba(0, 0, 0, 0.3); 
+                transform: translateY(0) scale(1); 
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+            50% { 
+                background: linear-gradient(180deg, #e91e63, #f06292); 
+                transform: translateY(-4px) scale(1.1); 
+                box-shadow: 0 8px 30px rgba(233, 30, 99, 0.8);
+            }
+            100% { 
+                background: linear-gradient(180deg, #e91e63, #f06292); 
+                transform: translateY(0) scale(1); 
+                box-shadow: 0 6px 25px rgba(233, 30, 99, 0.6);
+            }
+        }
+
+        @keyframes bookmarkPulse {
+            0%, 100% { 
+                box-shadow: 0 6px 25px rgba(233, 30, 99, 0.6);
+                transform: translateY(0) scale(1);
+            }
+            50% { 
+                box-shadow: 0 8px 35px rgba(233, 30, 99, 0.8);
+                transform: translateY(-2px) scale(1.02);
+            }
+        }
+
+        /* Add pulsing animation to bookmarked buttons */
+        button.bookmark-btn[data-event-id].bookmarked {
+            animation: bookmarkPulse 2s ease-in-out infinite !important;
+        }
+
+        /* Bookmark functionality styles */
+        .event-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-top: 15px;
+            position: relative;
+        }
+        
+        /* Event card positioning for bookmark button */
+        .event-card {
+            position: relative;
+            overflow: visible;
+        }
+        
+        .event-card .bookmark-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 10;
+        }
+        
+        /* Event actions container styling */
+        .event-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .event-actions .bookmark-btn {
+            position: relative;
+            top: auto;
+            right: auto;
+            background: rgba(255, 255, 255, 0.95);
+            color: #666;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .event-actions .bookmark-btn:hover {
+            background: rgba(255, 255, 255, 1);
+            color: #FF6B6B;
+            border-color: rgba(255, 107, 107, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .event-actions .bookmark-btn.bookmarked {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53);
+            color: white;
+            border-color: transparent;
+        }
+        
+        /* Adjust event card content to not overlap with bookmark */
+        .event-card .event-content {
+            padding-right: 60px;
+        }
+        
+        .bookmark-btn, .bookmark-btn.instagram-style {
+            background: rgba(0, 0, 0, 0.3) !important;
+            border: none !important;
+            color: rgba(255, 255, 255, 0.9) !important;
+            padding: 8px !important;
+            border-radius: 50% !important;
+            cursor: pointer !important;
+            font-size: 20px !important;
+            width: 40px !important;
+            height: 40px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            position: relative !important;
+            backdrop-filter: blur(10px) !important;
+            -webkit-backdrop-filter: blur(10px) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+        }
+        
+        .bookmark-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            opacity: 0;
+            transition: all 0.3s ease;
+            transform: scale(0.8);
+        }
+        
+        .bookmark-btn:hover, .bookmark-btn.instagram-style:hover {
+            background: rgba(0, 0, 0, 0.5) !important;
+            color: #ffffff !important;
+            transform: scale(1.05) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+        
+        .bookmark-btn:hover::before, .bookmark-btn.instagram-style:hover::before {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+        
+        .bookmark-btn:active, .bookmark-btn.instagram-style:active {
+            transform: scale(0.95) !important;
+        }
+        
+        .bookmark-btn.bookmarked, .bookmark-btn.instagram-style.bookmarked {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E53) !important;
+            color: white !important;
+            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4) !important;
+            animation: bookmarkSave 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        .bookmark-btn.bookmarked:hover, .bookmark-btn.instagram-style.bookmarked:hover {
+            background: linear-gradient(135deg, #FF5252, #FF7043) !important;
+            transform: scale(1.1) !important;
+            box-shadow: 0 6px 24px rgba(255, 107, 107, 0.5) !important;
+        }
+        
+        .bookmark-btn i {
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .bookmark-btn:hover i {
+            transform: scale(1.1);
+        }
+        
+        .bookmark-btn.bookmarked i {
+            animation: bookmarkPulse 0.8s ease-in-out;
+        }
+        
+        @keyframes bookmarkSave {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes bookmarkPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.15);
+            }
+        }
+        
+        /* Instagram-style ripple effect */
+        .bookmark-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: all 0.6s ease;
+        }
+        
+        .bookmark-btn:active::after {
+            width: 60px;
+            height: 60px;
+            opacity: 0;
+        }
+        
+        /* Bookmarked events grid */
+        .bookmarked-events-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .bookmarked-event-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .bookmarked-event-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .bookmarked-event-card .event-image {
+            height: 150px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        
+        .bookmarked-event-card .event-content {
+            padding: 20px;
+        }
+        
+        .bookmarked-event-card .event-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .bookmark-badge {
+            color: #ffd700;
+            font-size: 0.9em;
+        }
+        
+        .bookmarked-event-card p {
+            margin: 6px 0;
+            font-size: 0.9em;
+            color: #666;
+        }
+        
+        .bookmark-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .remove-bookmark-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            padding: 8px 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 12px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .remove-bookmark-btn:hover {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+        }
+        
+        .remove-bookmark-btn:active {
+            transform: translateY(0);
+        }
+        
+        .view-event-btn {
+            background: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            flex: 1;
+            text-align: center;
+        }
+        
+        .view-event-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+        
+        /* Empty state styling */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        
+        .bookmark-header {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-left: 4px solid #007bff;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .bookmark-header p {
+            margin: 0;
+            color: #495057;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bookmark-header i {
+            color: #007bff;
+        }
+        
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 12px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 300px;
+            border-left: 4px solid #007bff;
+        }
+        
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .notification-success {
+            border-left-color: #28a745;
+        }
+        
+        .notification-error {
+            border-left-color: #dc3545;
+        }
+        
+        .notification-info {
+            border-left-color: #17a2b8;
+        }
+        
+        .notification i {
+            margin-right: 8px;
+        }
+        
+        .notification-success i {
+            color: #28a745;
+        }
+        
+        .notification-error i {
+            color: #dc3545;
+        }
+        
+        .notification-info i {
+            color: #17a2b8;
+        }
+        
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .bookmarked-events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .event-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .notification {
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+        }
+        
         /* Student dashboard specific styles */
         
         /* Role Switcher Styles */
@@ -232,7 +695,7 @@
             <nav class="sidebar-nav">
                 <ul>
                     <li class="active" data-page="discover"><a href="#" title="Discover"><i class="fas fa-compass"></i><span>Discover</span></a></li>
-                    <li data-page="my-events"><a href="#" title="My Events"><i class="fas fa-calendar-check"></i><span>My Events</span></a></li>
+                    <li data-page="my-events"><a href="#" title="Saved Events"><i class="fas fa-bookmark"></i><span>Saved Events</span></a></li>
                     <li data-page="profile"><a href="#" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
                     <li><a href="{% url 'about' %}" title="About StudentConnect" target="_blank"><i class="fas fa-info-circle"></i><span>About</span></a></li>
                 </ul>
@@ -328,10 +791,18 @@
                                     {% if ev.description %}
                                         <p class="event-description">{{ ev.description|truncatewords:20 }}</p>
                                     {% endif %}
-                                    <a href="{% url 'event_detail' ev.id %}" class="cta-button primary" 
-                                       {% if ev.color_theme %}style="background-color: {{ ev.color_theme }};"{% endif %}>
-                                        View Details
-                                    </a>
+                                    <div class="event-actions">
+                                        <a href="{% url 'event_detail' ev.id %}" class="cta-button primary" 
+                                           {% if ev.color_theme %}style="background-color: {{ ev.color_theme }};"{% endif %}>
+                                                View Details
+                                        </a>
+                                        <button class="bookmark-btn rectangle-style" onclick="toggleBookmark({{ ev.id }}, '{{ ev.title|escapejs }}', '{{ ev.date }}', '{{ ev.time }}', '{{ ev.location|escapejs }}', '{{ ev.get_category_display|escapejs }}', '{{ ev.organizer.user.first_name|default:ev.organizer.user.username|escapejs }}', {% if ev.event_flyer %}'{{ ev.event_flyer.url }}'{% else %}null{% endif %}, '{{ ev.color_theme|default:"#007bff" }}')" 
+                                                title="Bookmark this event" data-event-id="{{ ev.id }}"
+                                                style="background: rgba(0, 0, 0, 0.3) !important; border: none !important; color: rgba(255, 255, 255, 0.9) !important; padding: 8px 12px !important; border-radius: 6px !important; height: 36px !important; display: flex !important; align-items: center !important; justify-content: center !important; transition: all 0.3s ease !important; min-width: 80px !important;">
+                                            <i class="far fa-bookmark" style="font-size: 16px !important; margin-right: 6px !important;"></i>
+                                            <span style="font-size: 13px !important; font-weight: 500 !important;">Save</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         {% endfor %}
@@ -342,9 +813,22 @@
             </section>
 
             <section id="my-events-page" class="page-content hidden">
-                <h3>My Registered Events</h3>
+                <h3>Saved Events</h3>
                 <div class="my-events-container">
-                    <p>You haven't registered for any events yet. Bookmarked events will also appear here!</p>
+                    <div class="bookmark-header">
+                        <p><i class="fas fa-bookmark"></i> Your saved events will appear here. Save events you're interested in to keep track of them!</p>
+                    </div>
+                    <div id="bookmarked-events-list" class="bookmarked-events-grid">
+                        <!-- Bookmarked events will be populated here by JavaScript -->
+                    </div>
+                    <div class="empty-bookmarks" style="display: none;">
+                        <div class="empty-state">
+                            <i class="fas fa-bookmark" style="font-size: 4rem; color: #ddd; margin-bottom: 1rem;"></i>
+                            <h4>No Saved Events Yet</h4>
+                            <p>Start exploring events and bookmark the ones you're interested in!</p>
+                            <button onclick="showPage('discover')" class="cta-button primary">Discover Events</button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -744,6 +1228,169 @@
         // Initialize professional auto-refresh system
         const autoRefresh = new ProfessionalAutoRefresh();
 
+        // Bookmark functionality for events
+        let bookmarkedEvents = JSON.parse(localStorage.getItem('bookmarkedEvents') || '[]');
+        
+        // Initialize bookmarks on page load
+        function initializeBookmarks() {
+            updateBookmarkButtons();
+            displayBookmarkedEvents();
+        }
+        
+        // Toggle bookmark for an event
+        function toggleBookmark(eventId, title, date, time, location, category, organizer, imageUrl, colorTheme) {
+            // Get the clicked button for immediate feedback
+            const clickedButton = event.target.closest('.bookmark-btn');
+            
+            const eventIndex = bookmarkedEvents.findIndex(event => event.id === eventId);
+            
+            if (eventIndex > -1) {
+                // Remove bookmark - immediate visual feedback
+                if (clickedButton) {
+                    clickedButton.style.background = 'rgba(0, 0, 0, 0.3)';
+                    clickedButton.style.transform = 'scale(0.9)';
+                    setTimeout(() => {
+                        clickedButton.style.transform = 'scale(1)';
+                    }, 150);
+                }
+                bookmarkedEvents.splice(eventIndex, 1);
+                showNotification('Event removed from bookmarks', 'info');
+            } else {
+                // Add bookmark - immediate visual feedback with color change
+                if (clickedButton) {
+                    clickedButton.style.background = 'linear-gradient(135deg, #e91e63, #f06292)';
+                    clickedButton.style.boxShadow = '0 6px 25px rgba(233, 30, 99, 0.6)';
+                    clickedButton.style.transform = 'scale(1.1)';
+                    setTimeout(() => {
+                        clickedButton.style.transform = 'scale(1)';
+                    }, 200);
+                }
+                const eventData = {
+                    id: eventId,
+                    title: title,
+                    date: date,
+                    time: time,
+                    location: location,
+                    category: category,
+                    organizer: organizer,
+                    imageUrl: imageUrl,
+                    colorTheme: colorTheme,
+                    bookmarkedAt: new Date().toISOString()
+                };
+                bookmarkedEvents.push(eventData);
+                showNotification('Event bookmarked successfully!', 'success');
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('bookmarkedEvents', JSON.stringify(bookmarkedEvents));
+            
+            // Update UI with slight delay to show the immediate feedback first
+            setTimeout(() => {
+                updateBookmarkButtons();
+                displayBookmarkedEvents();
+            }, 100);
+        }
+        
+        // Update bookmark button states
+        function updateBookmarkButtons() {
+            document.querySelectorAll('.bookmark-btn').forEach(btn => {
+                const eventId = parseInt(btn.dataset.eventId);
+                const isBookmarked = bookmarkedEvents.some(event => event.id === eventId);
+                
+                if (isBookmarked) {
+                    btn.classList.add('bookmarked');
+                    btn.innerHTML = '<i class="fas fa-bookmark" style="font-size: 16px !important; margin-right: 6px !important;"></i><span style="font-size: 13px !important; font-weight: 500 !important;">Saved</span>';
+                    btn.title = 'Remove from bookmarks';
+                } else {
+                    btn.classList.remove('bookmarked');
+                    btn.innerHTML = '<i class="far fa-bookmark" style="font-size: 16px !important; margin-right: 6px !important;"></i><span style="font-size: 13px !important; font-weight: 500 !important;">Save</span>';
+                    btn.title = 'Bookmark this event';
+                }
+            });
+        }
+        
+        // Display bookmarked events in the bookmarks section
+        function displayBookmarkedEvents() {
+            const container = document.getElementById('bookmarked-events-list');
+            const emptyState = document.querySelector('.empty-bookmarks');
+            
+            if (!container) return;
+            
+            if (bookmarkedEvents.length === 0) {
+                container.style.display = 'none';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+            
+            container.style.display = 'grid';
+            if (emptyState) emptyState.style.display = 'none';
+            
+            container.innerHTML = bookmarkedEvents.map(event => `
+                <div class="bookmarked-event-card" style="border-left: 4px solid ${event.colorTheme};">
+                    ${event.imageUrl ? `<div class="event-image" style="background-image: url('${event.imageUrl}');"></div>` : ''}
+                    <div class="event-content">
+                        <h4 class="event-title" style="color: ${event.colorTheme};">
+                            ${event.title}
+                            <span class="bookmark-badge"><i class="fas fa-bookmark"></i></span>
+                        </h4>
+                        <p class="event-date">📅 ${event.date}</p>
+                        <p class="event-time">🕐 ${event.time}</p>
+                        <p class="event-location">📍 ${event.location}</p>
+                        <p class="event-organizer">👤 ${event.organizer}</p>
+                        <p class="event-category">🏷️ ${event.category}</p>
+                        <div class="bookmark-actions">
+                            <button onclick="removeBookmark(${event.id})" class="remove-bookmark-btn">
+                                <i class="fas fa-trash"></i> Remove
+                            </button>
+                            <a href="/events/${event.id}/" class="view-event-btn" style="background-color: ${event.colorTheme};">
+                                View Details
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Remove bookmark
+        function removeBookmark(eventId) {
+            const eventIndex = bookmarkedEvents.findIndex(event => event.id === eventId);
+            if (eventIndex > -1) {
+                bookmarkedEvents.splice(eventIndex, 1);
+                localStorage.setItem('bookmarkedEvents', JSON.stringify(bookmarkedEvents));
+                updateBookmarkButtons();
+                displayBookmarkedEvents();
+                showNotification('Bookmark removed', 'info');
+            }
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeBookmarks();
+        });
+        
         // Student dashboard JavaScript functionality
     </script>
 
