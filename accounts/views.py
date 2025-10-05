@@ -389,9 +389,17 @@ def refresh_csrf_token(request):
 def student_dashboard(request):
     # Get or create profile, handling potential duplicates
     try:
-        profile = UserProfile.objects.filter(user=request.user, user_type="student").first()
+        # First try to get a profile with an avatar, otherwise get any profile
+        profile = UserProfile.objects.filter(user=request.user, user_type="student").exclude(avatar__exact='').first()
+        if not profile:
+            profile = UserProfile.objects.filter(user=request.user, user_type="student").first()
         if not profile:
             profile = UserProfile.objects.create(user=request.user, user_type="student")
+        
+        # Clean up duplicate profiles (keep the one with avatar if it exists, otherwise keep the first one)
+        duplicate_profiles = UserProfile.objects.filter(user=request.user, user_type="student").exclude(id=profile.id)
+        if duplicate_profiles.exists():
+            duplicate_profiles.delete()
     except Exception:
         profile = UserProfile.objects.create(user=request.user, user_type="student")
     
@@ -410,8 +418,18 @@ def student_dashboard(request):
 def organizer_dashboard(request):
     # Get the organizer profile, creating one only if it doesn't exist
     try:
-        profile = UserProfile.objects.get(user=request.user, user_type="organizer")
-    except UserProfile.DoesNotExist:
+        # First try to get a profile with an avatar, otherwise get any profile
+        profile = UserProfile.objects.filter(user=request.user, user_type="organizer").exclude(avatar__exact='').first()
+        if not profile:
+            profile = UserProfile.objects.filter(user=request.user, user_type="organizer").first()
+        if not profile:
+            profile = UserProfile.objects.create(user=request.user, user_type="organizer")
+        
+        # Clean up duplicate profiles (keep the one with avatar if it exists, otherwise keep the first one)
+        duplicate_profiles = UserProfile.objects.filter(user=request.user, user_type="organizer").exclude(id=profile.id)
+        if duplicate_profiles.exists():
+            duplicate_profiles.delete()
+    except Exception:
         profile = UserProfile.objects.create(user=request.user, user_type="organizer")
     
     # Refresh from database to ensure we have latest data
@@ -471,14 +489,30 @@ def create_event(request):
 def save_profile(request):
     if request.method == "POST":
         try:
-            # Try to get the user profile, handling multiple objects
-            profile = UserProfile.objects.filter(user=request.user).first()
+            # Determine user type based on redirect_to parameter
+            redirect_to = request.POST.get('redirect_to')
+            if redirect_to == 'student-dashboard':
+                user_type = 'student'
+            elif redirect_to == 'organizer-dashboard':
+                user_type = 'organizer'
+            else:
+                # Default fallback - try to determine from referer
+                referer = request.META.get('HTTP_REFERER', '')
+                if 'student-dashboard' in referer:
+                    user_type = 'student'
+                elif 'organizer-dashboard' in referer:
+                    user_type = 'organizer'
+                else:
+                    user_type = 'student'  # Default to student
+
+            # Try to get the user profile with the correct user_type
+            profile = UserProfile.objects.filter(user=request.user, user_type=user_type).first()
             if not profile:
                 # Create a new profile if none exists
-                profile = UserProfile.objects.create(user=request.user)
+                profile = UserProfile.objects.create(user=request.user, user_type=user_type)
             else:
-                # Clean up any duplicate profiles for this user
-                duplicate_profiles = UserProfile.objects.filter(user=request.user).exclude(id=profile.id)
+                # Clean up any duplicate profiles for this user and user_type
+                duplicate_profiles = UserProfile.objects.filter(user=request.user, user_type=user_type).exclude(id=profile.id)
                 if duplicate_profiles.exists():
                     duplicate_profiles.delete()
 
@@ -496,13 +530,29 @@ def save_profile(request):
             profile.avatar = request.FILES["avatar"]
 
         profile.save()
-        messages.success(request, "Profile updated successfully!")
+        
+        # Set user-type specific success message
+        if user_type == 'student':
+            messages.success(request, "Student profile updated successfully!")
+        else:
+            messages.success(request, "Organizer profile updated successfully!")
 
-        # Redirect back to correct dashboard
-        if profile.user_type == "student":
+        # Primary: Check for explicit redirect_to parameter
+        redirect_to = request.POST.get('redirect_to')
+        if redirect_to == 'student-dashboard':
             return redirect("student-dashboard")
-        elif profile.user_type == "organizer":
+        elif redirect_to == 'organizer-dashboard':
             return redirect("organizer-dashboard")
+        
+        # Secondary: Redirect based on where the request came from (referer)
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'student-dashboard' in referer:
+            return redirect("student-dashboard")
+        elif 'organizer-dashboard' in referer:
+            return redirect("organizer-dashboard")
+        
+        # Tertiary: Fallback to student dashboard (default)
+        return redirect("student-dashboard")
 
     return redirect("landing")
 
@@ -616,16 +666,31 @@ def update_profile(request):
     """Handle profile updates including avatar upload"""
     user = request.user
     
-    # Try to get the user's organizer profile first
+    # Determine user type based on the request context
+    if request.method == 'POST':
+        redirect_to = request.POST.get('redirect_to')
+        if redirect_to == 'student-dashboard':
+            user_type = 'student'
+        elif redirect_to == 'organizer-dashboard':
+            user_type = 'organizer'
+        else:
+            # Fallback to referer
+            referer = request.META.get('HTTP_REFERER', '')
+            if 'student-dashboard' in referer:
+                user_type = 'student'
+            elif 'organizer-dashboard' in referer:
+                user_type = 'organizer'
+            else:
+                user_type = 'student'  # Default to student
+    else:
+        user_type = 'student'  # Default for GET requests
+
+    # Try to get the correct profile based on user type
     try:
-        profile = UserProfile.objects.get(user=user, user_type='organizer')
+        profile = UserProfile.objects.get(user=user, user_type=user_type)
     except UserProfile.DoesNotExist:
-        # If no organizer profile, try student profile
-        try:
-            profile = UserProfile.objects.get(user=user, user_type='student')
-        except UserProfile.DoesNotExist:
-            # Create organizer profile as default
-            profile = UserProfile.objects.create(user=user, user_type='organizer')
+        # Create profile with correct user type
+        profile = UserProfile.objects.create(user=user, user_type=user_type)
     
     if request.method == 'POST':
         updated = False
@@ -644,23 +709,50 @@ def update_profile(request):
         if updated:
             profile.save()
             if 'avatar' in request.FILES:
-                messages.success(request, 'Profile picture updated successfully!')
+                if user_type == 'organizer':
+                    messages.success(request, 'Organizer profile picture updated successfully!')
+                else:
+                    messages.success(request, 'Student profile picture updated successfully!')
             else:
-                messages.success(request, 'Profile updated successfully!')
+                if user_type == 'organizer':
+                    messages.success(request, 'Organizer profile updated successfully!')
+                else:
+                    messages.success(request, 'Student profile updated successfully!')
         else:
             messages.info(request, 'No changes were made to your profile.')
         
-        # Redirect based on user type
+        # Primary: Check for explicit redirect_to parameter
+        redirect_to = request.POST.get('redirect_to')
+        if redirect_to == 'student-dashboard':
+            return redirect("student-dashboard")
+        elif redirect_to == 'organizer-dashboard':
+            return redirect("organizer-dashboard")
+        
+        # Secondary: Redirect based on where the request came from (referer)
+        referer = request.META.get('HTTP_REFERER', '')
+        if 'student-dashboard' in referer:
+            return redirect("student-dashboard")
+        elif 'organizer-dashboard' in referer:
+            return redirect("organizer-dashboard")
+        
+        # Tertiary: Fallback based on profile type
         if profile.user_type == 'organizer':
             return redirect('organizer-dashboard')
         else:
             return redirect('student-dashboard')
     
-    # Redirect based on user type
-    if profile.user_type == 'organizer':
-        return redirect('organizer-dashboard')
+    # For GET requests, redirect based on where the request came from (referer)
+    referer = request.META.get('HTTP_REFERER', '')
+    if 'student-dashboard' in referer:
+        return redirect("student-dashboard")
+    elif 'organizer-dashboard' in referer:
+        return redirect("organizer-dashboard")
     else:
-        return redirect('student-dashboard')
+        # Fallback: redirect based on profile type
+        if profile.user_type == 'organizer':
+            return redirect('organizer-dashboard')
+        else:
+            return redirect('student-dashboard')
 
 
 def url_test(request):

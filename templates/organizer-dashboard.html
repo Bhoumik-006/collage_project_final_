@@ -348,6 +348,18 @@
                 left: 0;
             }
         }
+
+        /* Message Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -420,10 +432,39 @@
         <main class="dashboard-content">
             <!-- Messages Display -->
             {% if messages %}
-                <div class="messages" style="margin-bottom: 20px;">
+                <div class="messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
                     {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }}" style="padding: 10px; margin: 5px 0; border-radius: 5px;">
+                        <div class="alert alert-{{ message.tags|default:'info' }}" style="
+                            background: {% if message.tags == 'success' %}#4CAF50{% elif message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#2196F3{% endif %};
+                            color: white;
+                            padding: 12px 40px 12px 16px;
+                            border-radius: 8px;
+                            margin-bottom: 10px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            animation: slideIn 0.3s ease-out;
+                            position: relative;
+                            min-height: 20px;
+                        ">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
                             {{ message }}
+                            <button onclick="this.parentElement.remove()" style="
+                                background: none; 
+                                border: none; 
+                                color: white; 
+                                position: absolute;
+                                top: 8px;
+                                right: 8px;
+                                cursor: pointer; 
+                                font-size: 18px;
+                                font-weight: bold;
+                                width: 20px;
+                                height: 20px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 50%;
+                                transition: background-color 0.2s;
+                            " onmouseover="this.style.backgroundColor='rgba(0,0,0,0.2)'" onmouseout="this.style.backgroundColor='transparent'">&times;</button>
                         </div>
                     {% endfor %}
                 </div>
@@ -579,6 +620,7 @@
                 <div class="profile-container">
                     <form id="profile-form" method="POST" enctype="multipart/form-data" action="{% url 'update_profile' %}">
                         {% csrf_token %}
+                        <input type="hidden" name="redirect_to" value="organizer-dashboard">
                         <div class="profile-content-wrapper">
                             <div class="profile-avatar-section">
                                 <img src="{% if profile.avatar %}{{ profile.avatar.url }}?v={% now 'U' %}{% else %}https://i.ibb.co/615b2D4/default-avatar.png{% endif %}" 
