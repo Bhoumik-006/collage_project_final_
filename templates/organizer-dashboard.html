@@ -1,0 +1,1109 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>Dashboard | Organizer Portal</title>
+    <link rel="stylesheet" href="{% static 'css/organizer.css' %}?v={{ timestamp }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+    <script>
+        // CSRF token helper function
+        function getCSRFToken() {
+            const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            if (!token) {
+                console.error('CSRF token not found');
+                return null;
+            }
+            return token;
+        }
+        
+        // Set up CSRF token for all AJAX requests
+        window.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = getCSRFToken();
+            if (csrfToken) {
+                // Set CSRF token for all forms
+                const forms = document.querySelectorAll('form');
+                forms.forEach(form => {
+                    let csrfInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+                    if (csrfInput) {
+                        csrfInput.value = csrfToken;
+                    }
+                });
+                
+                // Set up for AJAX requests
+                window.csrfToken = csrfToken;
+                
+                // Auto-refresh CSRF token every 30 minutes
+                setInterval(function() {
+                    fetch('/refresh-csrf/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Update meta tag
+                            const metaTag = document.querySelector('meta[name="csrf-token"]');
+                            if (metaTag) {
+                                const newToken = document.cookie.split('csrftoken=')[1]?.split(';')[0];
+                                if (newToken) {
+                                    metaTag.setAttribute('content', newToken);
+                                    window.csrfToken = newToken;
+                                    
+                                    // Update all form CSRF tokens
+                                    const forms = document.querySelectorAll('form');
+                                    forms.forEach(form => {
+                                        let csrfInput = form.querySelector('input[name="csrfmiddlewaretoken"]');
+                                        if (csrfInput) {
+                                            csrfInput.value = newToken;
+                                        }
+                                    });
+                                }
+                            }
+                        }
+                    })
+                    .catch(error => console.log('CSRF refresh failed:', error));
+                }, 30 * 60 * 1000); // 30 minutes
+            }
+        });
+        
+        // Role Switcher Functionality
+        function toggleRoleDropdown() {
+            const dropdown = document.getElementById('roleDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const roleDropdown = document.getElementById('roleDropdown');
+            const roleToggleBtn = document.querySelector('.role-toggle-btn');
+            
+            if (roleDropdown && !roleDropdown.contains(event.target) && event.target !== roleToggleBtn) {
+                roleDropdown.classList.remove('show');
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dropdown = document.getElementById('roleDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+    </script>
+    <style>
+        /* Status Badge Styles */
+        .status-approved { background: #d4edda; color: #155724; }
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-denied { background: #f8d7da; color: #721c24; }
+        
+        /* Action Button Styles */
+        .action-btn:hover { opacity: 0.8; transform: translateY(-1px); transition: all 0.2s ease; }
+        .action-btn.delete-btn { color: #dc3545; margin-left: 10px; }
+        .action-btn.delete-btn:hover { color: #c82333; background-color: rgba(220, 53, 69, 0.1); }
+        
+        /* Events Section */
+        .events-section { margin-top: 30px; }
+        
+        /* Form Step Navigation */
+        .form-step { display: none; }
+        .form-step.active { display: block; }
+        .form-navigation { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-top: 30px; 
+            padding-top: 20px; 
+            border-top: 1px solid #e5e5e5; 
+        }
+        
+        /* Dashboard View Visibility */
+        .dashboard-view { display: block; }
+        .dashboard-view.hidden { display: none; }
+        
+        /* Sidebar Active State */
+        .sidebar-nav li.active a { background: rgba(255,255,255,0.15); }
+        
+        /* Image Preview */
+        .image-preview.hidden { display: none; }
+        .image-preview { 
+            max-width: 300px; 
+            max-height: 200px;
+            width: auto;
+            height: auto; 
+            border-radius: 8px; 
+            margin-top: 10px;
+            object-fit: contain;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Event Table Thumbnail Images */
+        .event-thumbnail {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .event-thumbnail:hover {
+            transform: scale(1.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        /* Drag Drop Area */
+        .drag-drop-area { 
+            border: 2px dashed #ccc; 
+            border-radius: 8px; 
+            padding: 30px; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
+        .drag-drop-area:hover, .drag-drop-area.active { 
+            border-color: #007bff; 
+            background: #f8f9fa; 
+        }
+        
+        /* Form Validation */
+        .form-group input:invalid, .form-group textarea:invalid, .form-group select:invalid {
+            border-color: #dc3545;
+        }
+        .form-group input:valid, .form-group textarea:valid, .form-group select:valid {
+            border-color: #28a745;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+            .event-table-container { overflow-x: auto; }
+            .form-navigation { flex-direction: column; gap: 10px; }
+        }
+        
+        /* Profile Image Upload Styles */
+        .profile-avatar-large {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .upload-btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .upload-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+        }
+        
+        .profile-avatar-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        /* Message Alerts */
+        .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert-error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .alert-info { background: #cce7ff; color: #0c5460; border: 1px solid #b6d4fe; }
+        
+        /* Temporary debugging styles for logout button */
+        .sidebar-footer .logout-btn {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.08), rgba(220, 38, 38, 0.05)) !important;
+            border: 1px solid rgba(239, 68, 68, 0.15) !important;
+            border-radius: 16px !important;
+            color: #f87171 !important;
+            font-weight: 600 !important;
+            padding: 12px 16px !important;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        
+        .sidebar-footer .logout-btn:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 8px 25px 0 rgba(239, 68, 68, 0.25) !important;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.12)) !important;
+            color: #fef2f2 !important;
+        }
+        
+        /* Role Switcher Styles */
+        .user-role-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .current-role {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .current-role i {
+            font-size: 11px;
+        }
+        
+        .role-dropdown {
+            position: relative;
+        }
+        
+        .role-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .role-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .role-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .role-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(2px);
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .role-option:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .role-option.current {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            cursor: default;
+        }
+        
+        .role-option i {
+            font-size: 12px;
+            width: 14px;
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .user-role-switcher {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .role-options {
+                right: auto;
+                left: 0;
+            }
+        }
+
+        /* Message Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-page">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <div class="logo-icon">🎓</div>
+                    <div class="logo-text">
+                        <div class="brand-name">StudentConnect</div>
+                        <div class="brand-tagline">Organizer Portal</div>
+                    </div>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <ul>
+                        <li class="active" data-view="dashboard-overview"><a href="#" title="Dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li data-view="create-event-view"><a href="#" title="Create Event"><i class="fas fa-plus-circle"></i><span>Create Event</span></a></li>
+                        <li data-view="profile-page"><a href="#" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+                        <li><a href="{% url 'about' %}" title="About StudentConnect" target="_blank"><i class="fas fa-info-circle"></i><span>About</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {% if user.first_name %}{{ user.first_name.0 }}{% endif %}{% if user.last_name %}{{ user.last_name.0 }}{% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="user-role-switcher">
+                            <div class="current-role">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Event Organizer</span>
+                            </div>
+                            <div class="role-dropdown">
+                                <button type="button" class="role-toggle-btn" onclick="toggleRoleDropdown()">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <div class="role-options" id="roleDropdown">
+                                    <a href="{% url 'student-dashboard' %}" class="role-option">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Switch to Student</span>
+                                    </a>
+                                    <div class="role-option current">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>Organizer (Current)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" title="Sign Out">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </form>
+            </div>
+            
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+        </aside>
+
+        <main class="dashboard-content">
+            <!-- Messages Display -->
+            {% if messages %}
+                <div class="messages" style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags|default:'info' }}" style="
+                            background: {% if message.tags == 'success' %}#4CAF50{% elif message.tags == 'error' %}#f44336{% elif message.tags == 'warning' %}#ff9800{% else %}#2196F3{% endif %};
+                            color: white;
+                            padding: 12px 40px 12px 16px;
+                            border-radius: 8px;
+                            margin-bottom: 10px;
+                            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+                            animation: slideIn 0.3s ease-out;
+                            position: relative;
+                            min-height: 20px;
+                        ">
+                            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button onclick="this.parentElement.remove()" style="
+                                background: none; 
+                                border: none; 
+                                color: white; 
+                                position: absolute;
+                                top: 8px;
+                                right: 8px;
+                                cursor: pointer; 
+                                font-size: 18px;
+                                font-weight: bold;
+                                width: 20px;
+                                height: 20px;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 50%;
+                                transition: background-color 0.2s;
+                            " onmouseover="this.style.backgroundColor='rgba(0,0,0,0.2)'" onmouseout="this.style.backgroundColor='transparent'">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <section id="dashboard-overview" class="dashboard-view">
+                <header class="view-header">
+                    <h2>Dashboard Overview</h2>
+                    <p>Welcome, TechEvents Inc!</p>
+                </header>
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h4>Total Active</h4>
+                        <p id="total-events-count">{{ total_count }}</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Pending</h4>
+                        <p id="pending-events-count">{{ pending_count }}</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Approved</h4>
+                        <p id="approved-events-count">{{ approved_count }}</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h4>Denied</h4>
+                        <p id="denied-events-count">{{ denied_count }}</p>
+                    </div>
+                </div>
+
+                <!-- Your Events Section -->
+                <div class="events-section" style="margin-top: 30px;">
+                    <h3 style="color: #1a1a1a; margin-bottom: 20px; font-weight: 700;"><i class="fas fa-calendar-check"></i> Your Events</h3>
+                    {% if active_events and active_events.count > 0 %}
+                        <div class="event-table-container">
+                            <table class="event-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                                <thead>
+                                    <tr style="background: #f8f9fa;">
+                                        <th style="padding: 15px; text-align: left; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Event Title</th>
+                                        <th style="padding: 15px; text-align: left; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Image</th>
+                                        <th style="padding: 15px; text-align: left; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Category</th>
+                                        <th style="padding: 15px; text-align: left; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Date</th>
+                                        <th style="padding: 15px; text-align: left; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Status</th>
+                                        <th style="padding: 15px; text-align: center; border-bottom: 1px solid #dee2e6; color: #1a1a1a; font-weight: 600;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for event in active_events %}
+                                        <tr style="border-bottom: 1px solid #f1f3f4;">
+                                            <td style="padding: 15px; font-weight: 500; color: #1a1a1a;">{{ event.title }}</td>
+                                            <td style="padding: 15px; text-align: center;">
+                                                {% if event.event_flyer %}
+                                                    <img src="{{ event.event_flyer.url }}" class="event-thumbnail" alt="Event Image" title="Click to view full size" onclick="window.open('{{ event.event_flyer.url }}', '_blank')">
+                                                {% else %}
+                                                    <span style="color: #6c757d; font-size: 12px;">No Image</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="padding: 15px; color: #1a1a1a;">{{ event.get_category_display }}</td>
+                                            <td style="padding: 15px; color: #1a1a1a;">{{ event.date }}</td>
+                                            <td style="padding: 15px;">
+                                                <span class="status-badge status-{{ event.status }}" style="padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500;">
+                                                    {{ event.get_status_display }}
+                                                </span>
+                                            </td>
+                                            <td style="padding: 15px; text-align: center;">
+                                                <a href="{% url 'edit_event' event.id %}" class="action-btn" style="display: inline-block; padding: 8px 12px; margin: 0 5px; background: #007bff; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;" title="Edit Event">
+                                                    <i class="fas fa-edit"></i> Edit
+                                                </a>
+                                                <a href="{% url 'delete_event' event.id %}" class="action-btn delete-btn" style="display: inline-block; padding: 8px 12px; margin: 0 5px; background: #dc3545; color: white; text-decoration: none; border-radius: 4px; font-size: 14px;" title="Delete Event">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="no-events" style="text-align: center; padding: 40px; background: #f8f9fa; border-radius: 8px; color: #495057;">
+                            <i class="fas fa-calendar-times" style="font-size: 48px; margin-bottom: 20px; color: #6c757d;"></i>
+                            <h4 style="margin-bottom: 10px; color: #1a1a1a;">No Events Yet</h4>
+                            <p>You haven't created any events yet. <a href="#" onclick="showView('create-event-view')" style="color: #007bff;">Create your first event</a></p>
+                        </div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section id="create-event-view" class="dashboard-view hidden">
+                 <header class="view-header">
+                    <h2>Create a New Event</h2>
+                    <p>Fill out the details to get your event listed on the platform.</p>
+                </header>
+                <form id="event-form" class="event-form-container" method="POST" action="{% url 'create_event' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-step active">
+                        <h3>Step 1: Basic Information</h3>
+                        <div class="form-group">
+                            <label for="event-title">Event Title</label>
+                            <input type="text" id="event-title" name="title" placeholder="e.g., Annual Tech Hackathon" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-category">Category</label>
+                            <select id="event-category" name="category">
+                                <option value="hackathon">Hackathon</option>
+                                <option value="workshop">Workshop</option>
+                                <option value="internship">Internship</option>
+                                <option value="techevent">TechEvent</option> 
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-date">Event Date</label>
+                            <input type="date" id="event-date" name="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-time">Event Time</label>
+                            <input type="time" id="event-time" name="time" required>
+                        </div>
+                    </div>
+                    <div class="form-step">
+                         <h3>Step 2: Details & Location</h3>
+                         <div class="form-group">
+                            <label for="event-description">Description</label>
+                            <textarea id="event-description" name="description" rows="5" placeholder="Describe your event..."></textarea>
+                         </div>
+                         <div class="form-group">
+                            <label for="event-location">Location</label>
+                            <input type="text" id="event-location" name="location" placeholder="e.g., Main Auditorium, City Center" required>
+                         </div>
+                         <div class="form-group">
+                             <label for="event-flyer">Event Flyer (Optional)</label>
+                             <div id="drag-drop-area" class="drag-drop-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Drag & Drop</strong> an image here or click to upload</p>
+                                <input type="file" id="event-flyer" name="event_flyer" accept="image/*" hidden>
+                             </div>
+                             <img id="image-preview" class="image-preview hidden" src="#" alt="Image Preview"/>
+                         </div>
+                         <div class="form-group">
+                             <label for="event-link">Event Registration Link <span class="required">*</span></label>
+                             <input type="url" id="event-link" name="event_link" placeholder="https://example.com/register" required />
+                             <small class="form-help">Registration link or event website is mandatory for all events</small>
+                         </div>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" id="prevBtn" class="cta-button secondary hidden">Previous</button>
+                        <button type="button" id="nextBtn" class="cta-button primary">Next</button>
+                        <button type="submit" id="submitBtn" class="cta-button primary hidden">Submit for Review</button>
+                    </div>
+                </form>
+            </section>
+
+            <section id="profile-page" class="dashboard-view hidden">
+                <h3>My Profile</h3>
+                <div class="profile-container">
+                    <form id="profile-form" method="POST" enctype="multipart/form-data" action="{% url 'update_profile' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="redirect_to" value="organizer-dashboard">
+                        <div class="profile-content-wrapper">
+                            <div class="profile-avatar-section">
+                                <img src="{% if profile.avatar %}{{ profile.avatar.url }}?v={% now 'U' %}{% else %}https://i.ibb.co/615b2D4/default-avatar.png{% endif %}" 
+                                    alt="Profile Picture"
+                                    id="profile-picture-preview"
+                                    class="profile-avatar-large">
+                                <label for="profile-upload-input" class="upload-btn">
+                                    <i class="fas fa-camera"></i> Upload Photo
+                                </label>
+                                <input type="file" id="profile-upload-input" name="avatar" class="hidden" accept="image/*">
+                            </div>
+                            <div class="profile-details-section">
+                                <div class="info-field">
+                                    <label>Full Name</label>
+                                    <input type="text" value="{{ user.first_name }}" readonly>
+                                </div>
+                                <div class="info-field">
+                                    <label>Email Address</label>
+                                    <input type="email" value="{{ user.email }}" readonly>
+                                </div>
+                                <div class="info-field">
+                                    <label>Role</label>
+                                    <input type="text" value="{{ profile.user_type }}" readonly>
+                                </div>
+                                <div class="info-field">
+                                    <label for="profile-mobile-input">Mobile Number</label>
+                                    <input type="tel" id="profile-mobile-input" name="contact_number"
+                                        value="{{ profile.contact_number|default:'' }}" 
+                                        placeholder="+91 98765 43210">
+                                </div>
+                                <button type="submit" class="cta-button primary" id="save-profile-btn">Save Changes</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+    </div>
+    
+    <script src="{% static 'js/organizer.js' %}"></script>
+    <script>
+        // Ensure logout works without confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Find logout button and remove any onclick handlers
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                // Remove any existing onclick attribute
+                logoutBtn.removeAttribute('onclick');
+                // Override any global confirmLogout function
+                window.confirmLogout = undefined;
+            }
+        });
+
+        /*
+        ===================================
+        CSRF TOKEN UTILITY FUNCTIONS
+        ===================================
+        Enterprise-grade CSRF token handling for organizer dashboard
+        */
+        
+        // Get CSRF token from meta tag or cookie
+        function getCSRFToken() {
+            // Try to get from meta tag first (most reliable)
+            const metaToken = document.querySelector('meta[name="csrf-token"]');
+            if (metaToken) {
+                return metaToken.getAttribute('content');
+            }
+            
+            // Fallback to cookie method
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('csrftoken='));
+            return cookieValue ? cookieValue.split('=')[1] : null;
+        }
+        
+        // Setup CSRF headers for fetch requests
+        function getCSRFHeaders() {
+            const token = getCSRFToken();
+            return token ? {
+                'X-CSRFToken': token,
+                'Content-Type': 'application/x-www-form-urlencoded',
+            } : {};
+        }
+        
+        // Professional Auto-Refresh System - Enterprise Grade
+        class ProfessionalAutoRefresh {
+            constructor() {
+                this.interval = null;
+                this.isUserActive = false;
+                this.lastActivity = Date.now();
+                this.refreshInterval = 45000; // Start with 45 seconds for organizer
+                this.maxInterval = 600000; // Max 10 minutes
+                this.minInterval = 20000; // Min 20 seconds
+                this.retryCount = 0;
+                this.maxRetries = 3;
+                
+                this.initializeActivityTracking();
+                this.initializeRefreshIndicator();
+                this.startAutoRefresh();
+            }
+            
+            initializeActivityTracking() {
+                // Track organizer-specific interactions
+                ['click', 'keydown', 'scroll', 'mousemove', 'touchstart', 'change', 'input'].forEach(event => {
+                    document.addEventListener(event, () => this.markUserActive(), { passive: true });
+                });
+                
+                // Track page visibility with priority for organizers
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden) {
+                        this.pauseAutoRefresh();
+                    } else {
+                        this.resumeAutoRefresh();
+                        this.markUserActive();
+                        // Immediate refresh when organizer returns
+                        setTimeout(() => this.performRefresh(), 1000);
+                    }
+                });
+                
+                // Track window focus/blur
+                window.addEventListener('focus', () => {
+                    this.markUserActive();
+                    setTimeout(() => this.performRefresh(), 500);
+                });
+                window.addEventListener('blur', () => this.pauseAutoRefresh());
+            }
+            
+            markUserActive() {
+                this.isUserActive = true;
+                this.lastActivity = Date.now();
+                this.adjustRefreshInterval();
+                
+                // Clear active state after 8 seconds for organizers
+                setTimeout(() => {
+                    this.isUserActive = false;
+                }, 8000);
+            }
+            
+            adjustRefreshInterval() {
+                const timeSinceActivity = Date.now() - this.lastActivity;
+                
+                if (timeSinceActivity < 120000) { // Very recent activity
+                    this.refreshInterval = this.minInterval;
+                } else if (timeSinceActivity < 600000) { // Recent activity
+                    this.refreshInterval = 90000; // 1.5 minutes
+                } else { // Inactive organizer
+                    this.refreshInterval = Math.min(this.maxInterval, this.refreshInterval * 1.3);
+                }
+            }
+            
+            initializeRefreshIndicator() {
+                const indicator = document.createElement('div');
+                indicator.id = 'organizer-refresh-indicator';
+                indicator.innerHTML = `
+                    <div class="refresh-icon">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M8 4.466V2.534a.5.5 0 0 1 .854-.354l2.5 2.5a.5.5 0 0 1 0 .708l-2.5 2.5A.5.5 0 0 1 8 7.534V5.534A4.5 4.5 0 0 0 4 10a.5.5 0 0 1-1 0A5.5 5.5 0 0 1 8 4.466z"/>
+                        </svg>
+                    </div>
+                    <span class="refresh-text">Syncing data...</span>
+                `;
+                
+                const style = document.createElement('style');
+                style.textContent = `
+                    #organizer-refresh-indicator {
+                        position: fixed;
+                        top: 70px;
+                        right: 20px;
+                        background: rgba(255, 255, 255, 0.97);
+                        backdrop-filter: blur(12px);
+                        border: 1px solid rgba(0, 0, 0, 0.08);
+                        border-radius: 10px;
+                        padding: 10px 14px;
+                        font-size: 13px;
+                        font-weight: 500;
+                        color: #495057;
+                        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+                        display: flex;
+                        align-items: center;
+                        gap: 8px;
+                        opacity: 0;
+                        transform: translateX(20px);
+                        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                        z-index: 1050;
+                        pointer-events: none;
+                        border-left: 3px solid #007bff;
+                    }
+                    
+                    #organizer-refresh-indicator.show {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                    
+                    #organizer-refresh-indicator.success {
+                        background: rgba(40, 167, 69, 0.95);
+                        color: white;
+                        border-left-color: #28a745;
+                        border-color: rgba(40, 167, 69, 0.2);
+                    }
+                    
+                    #organizer-refresh-indicator.error {
+                        background: rgba(220, 53, 69, 0.95);
+                        color: white;
+                        border-left-color: #dc3545;
+                        border-color: rgba(220, 53, 69, 0.2);
+                    }
+                    
+                    #organizer-refresh-indicator.warning {
+                        background: rgba(255, 193, 7, 0.95);
+                        color: #212529;
+                        border-left-color: #ffc107;
+                        border-color: rgba(255, 193, 7, 0.2);
+                    }
+                    
+                    #organizer-refresh-indicator .refresh-icon {
+                        display: flex;
+                        align-items: center;
+                        flex-shrink: 0;
+                    }
+                    
+                    #organizer-refresh-indicator .refresh-icon svg {
+                        animation: organizer-refresh-spin 1.2s linear infinite;
+                    }
+                    
+                    #organizer-refresh-indicator.success .refresh-icon svg,
+                    #organizer-refresh-indicator.error .refresh-icon svg,
+                    #organizer-refresh-indicator.warning .refresh-icon svg {
+                        animation: none;
+                    }
+                    
+                    @keyframes organizer-refresh-spin {
+                        from { transform: rotate(0deg); }
+                        to { transform: rotate(360deg); }
+                    }
+                    
+                    /* Dark theme support */
+                    [data-theme="dark"] #organizer-refresh-indicator {
+                        background: rgba(30, 30, 30, 0.97);
+                        border-color: rgba(255, 255, 255, 0.1);
+                        color: #e9ecef;
+                    }
+                    
+                    /* Mobile responsive */
+                    @media (max-width: 768px) {
+                        #organizer-refresh-indicator {
+                            top: 10px;
+                            right: 10px;
+                            font-size: 12px;
+                            padding: 8px 12px;
+                        }
+                    }
+                `;
+                document.head.appendChild(style);
+                document.body.appendChild(indicator);
+                
+                this.indicator = indicator;
+            }
+            
+            showIndicator(type = 'syncing', message = 'Syncing data...') {
+                if (!this.indicator) return;
+                
+                this.indicator.className = '';
+                this.indicator.classList.add('show');
+                
+                if (type !== 'syncing') {
+                    this.indicator.classList.add(type);
+                }
+                
+                this.indicator.querySelector('.refresh-text').textContent = message;
+                
+                if (type !== 'syncing') {
+                    setTimeout(() => {
+                        this.hideIndicator();
+                    }, type === 'error' ? 3000 : 2500);
+                }
+            }
+            
+            hideIndicator() {
+                if (this.indicator) {
+                    this.indicator.classList.remove('show');
+                }
+            }
+            
+            async performRefresh() {
+                // Skip refresh during active organizer work
+                if (this.isUserActive || (Date.now() - this.lastActivity < 15000)) {
+                    return;
+                }
+                
+                this.showIndicator('syncing', 'Updating dashboard...');
+                
+                try {
+                    const response = await fetch(window.location.href, {
+                        method: 'GET',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Cache-Control': 'no-cache',
+                            'X-Organizer-Refresh': 'true'
+                        }
+                    });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const html = await response.text();
+                    const parser = new DOMParser();
+                    const newDoc = parser.parseFromString(html, 'text/html');
+                    
+                    let hasUpdates = false;
+                    
+                    // Update organizer-specific sections
+                    const sections = [
+                        { selector: '.analytics-card h3', name: 'analytics', isCollection: true },
+                        { selector: '#events-table tbody', name: 'events table' },
+                        { selector: '.activity-item', name: 'activity feed', isParent: true },
+                        { selector: '.stats-card .stat-value', name: 'statistics', isCollection: true },
+                        { selector: '.notification-count', name: 'notifications', isCollection: true }
+                    ];
+                    
+                    sections.forEach(section => {
+                        if (section.isCollection) {
+                            const currentElements = document.querySelectorAll(section.selector);
+                            const newElements = newDoc.querySelectorAll(section.selector);
+                            
+                            currentElements.forEach((el, index) => {
+                                if (newElements[index] && el.textContent !== newElements[index].textContent) {
+                                    el.textContent = newElements[index].textContent;
+                                    hasUpdates = true;
+                                }
+                            });
+                        } else if (section.isParent) {
+                            const current = document.querySelector(section.selector);
+                            const updated = newDoc.querySelector(section.selector);
+                            
+                            if (current && updated) {
+                                const currentParent = current.parentElement;
+                                const newParent = updated.parentElement;
+                                if (currentParent && newParent && currentParent.innerHTML !== newParent.innerHTML) {
+                                    currentParent.innerHTML = newParent.innerHTML;
+                                    hasUpdates = true;
+                                }
+                            }
+                        } else {
+                            const current = document.querySelector(section.selector);
+                            const updated = newDoc.querySelector(section.selector);
+                            
+                            if (current && updated && current.innerHTML !== updated.innerHTML) {
+                                current.innerHTML = updated.innerHTML;
+                                hasUpdates = true;
+                            }
+                        }
+                    });
+                    
+                    // Provide appropriate feedback
+                    if (hasUpdates) {
+                        this.showIndicator('success', 'Dashboard updated');
+                        this.retryCount = 0;
+                    } else {
+                        this.hideIndicator();
+                    }
+                    
+                    console.log(`[${new Date().toLocaleTimeString()}] Organizer dashboard sync - ${hasUpdates ? 'Updates applied' : 'No changes detected'}`);
+                    
+                } catch (error) {
+                    console.warn('[Auto-refresh] Organizer sync failed:', error.message);
+                    this.handleRefreshError();
+                }
+            }
+            
+            handleRefreshError() {
+                this.retryCount++;
+                
+                if (this.retryCount <= this.maxRetries) {
+                    this.showIndicator('warning', `Connection issue, retrying... (${this.retryCount}/${this.maxRetries})`);
+                    
+                    setTimeout(() => {
+                        this.performRefresh();
+                    }, Math.pow(2, this.retryCount) * 2000);
+                } else {
+                    this.showIndicator('error', 'Sync temporarily unavailable');
+                    this.refreshInterval = Math.min(this.maxInterval, this.refreshInterval * 2);
+                    this.retryCount = 0;
+                }
+            }
+            
+            startAutoRefresh() {
+                this.interval = setInterval(() => {
+                    this.adjustRefreshInterval();
+                    this.performRefresh();
+                }, this.refreshInterval);
+            }
+            
+            pauseAutoRefresh() {
+                if (this.interval) {
+                    clearInterval(this.interval);
+                    this.interval = null;
+                }
+                this.hideIndicator();
+            }
+            
+            resumeAutoRefresh() {
+                if (!this.interval) {
+                    this.startAutoRefresh();
+                }
+            }
+        }
+        
+        // Initialize professional auto-refresh for organizers
+        const organizerAutoRefresh = new ProfessionalAutoRefresh();
+        
+        // Modern Sidebar Toggle Functionality
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.dashboard-content');
+            
+            sidebar.classList.toggle('collapsed');
+            
+            // Adjust main content margin
+            if (sidebar.classList.contains('collapsed')) {
+                mainContent.style.marginLeft = '72px';
+            } else {
+                mainContent.style.marginLeft = '280px';
+            }
+        }
+        
+        // Enhanced logout button functionality
+        function enhancedLogout(button, event) {
+            event.preventDefault();
+            
+            if (button.classList.contains('confirming')) {
+                // Second click - proceed with logout
+                button.innerHTML = '<i class="fas fa-check"></i><span>Signing Out...</span>';
+                button.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                
+                setTimeout(() => {
+                    button.closest('form').submit();
+                }, 1000);
+            } else {
+                // First click - ask for confirmation
+                button.classList.add('confirming');
+                button.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Confirm?</span>';
+                
+                // Reset after 3 seconds if no second click
+                setTimeout(() => {
+                    if (button.classList.contains('confirming')) {
+                        button.classList.remove('confirming');
+                        button.innerHTML = '<i class="fas fa-sign-out-alt"></i><span>Sign Out</span>';
+                    }
+                }, 3000);
+            }
+        }
+        
+        // Initialize enhanced features when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add enhanced logout functionality
+            const logoutBtn = document.querySelector('.logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    enhancedLogout(this, e);
+                });
+            }
+            
+            // Add responsive sidebar behavior
+            function handleResize() {
+                const sidebar = document.querySelector('.sidebar');
+                const mainContent = document.querySelector('.dashboard-content');
+                
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.add('mobile-hidden');
+                    mainContent.style.marginLeft = '0';
+                } else {
+                    sidebar.classList.remove('mobile-hidden');
+                    if (sidebar.classList.contains('collapsed')) {
+                        mainContent.style.marginLeft = '72px';
+                    } else {
+                        mainContent.style.marginLeft = '280px';
+                    }
+                }
+            }
+            
+            window.addEventListener('resize', handleResize);
+            handleResize(); // Initial check
+        });
+    </script>
+</body>
+</html>

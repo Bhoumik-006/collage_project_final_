@@ -1,0 +1,416 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Event | Organizer Portal</title>
+    <link rel="stylesheet" href="{% static 'css/organizer.css' %}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/2a975638e3.js" crossorigin="anonymous"></script>
+    <style>
+        /* Role Switcher Styles */
+        .user-role-switcher {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+        }
+        
+        .current-role {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .current-role i {
+            font-size: 11px;
+        }
+        
+        .role-dropdown {
+            position: relative;
+        }
+        
+        .role-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .role-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .role-options {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            min-width: 180px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s ease;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        
+        .role-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(2px);
+        }
+        
+        .role-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            color: #475569;
+            text-decoration: none;
+            font-size: 13px;
+            transition: background-color 0.2s ease;
+            border: none;
+            width: 100%;
+            text-align: left;
+        }
+        
+        .role-option:hover {
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        
+        .role-option.current {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            cursor: default;
+        }
+        
+        .role-option i {
+            font-size: 12px;
+            width: 14px;
+        }
+        
+        /* Fix any sidebar glitches */
+        .sidebar-nav ul li a {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: #fff;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .sidebar-nav ul li a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        .sidebar-nav ul li a i {
+            margin-right: 10px;
+            width: 16px;
+        }
+        /* Form step navigation fixes */
+        .form-step {
+            display: none;
+        }
+        .form-step.active {
+            display: block;
+        }
+        .form-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e5e5;
+        }
+        /* Image Preview for Edit Event */
+        .image-preview { 
+            max-width: 250px; 
+            max-height: 180px;
+            width: auto;
+            height: auto;
+            margin-top: 15px; 
+            border-radius: 8px; 
+            object-fit: contain;
+            border: 2px solid #ddd;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        /* Mobile adjustments */
+        @media (max-width: 768px) {
+            .user-role-switcher {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            
+            .role-options {
+                right: auto;
+                left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="dashboard-page">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <div class="logo-icon">🎓</div>
+                    <div class="logo-text">
+                        <div class="brand-name">StudentConnect</div>
+                        <div class="brand-tagline">Edit Event</div>
+                    </div>
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-group">
+                    <ul>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Dashboard"><i class="fas fa-tachometer-alt"></i><span>Dashboard</span></a></li>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Create Event"><i class="fas fa-plus-circle"></i><span>Create Event</span></a></li>
+                        <li><a href="{% url 'organizer-dashboard' %}" title="Profile"><i class="fas fa-user"></i><span>Profile</span></a></li>
+                        <li><a href="{% url 'about' %}" title="About StudentConnect" target="_blank"><i class="fas fa-info-circle"></i><span>About</span></a></li>
+                    </ul>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        {% if user.first_name %}{{ user.first_name.0 }}{% endif %}{% if user.last_name %}{{ user.last_name.0 }}{% endif %}
+                    </div>
+                    <div class="user-info">
+                        <div class="user-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="user-role-switcher">
+                            <div class="current-role">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Event Organizer</span>
+                            </div>
+                            <div class="role-dropdown">
+                                <button type="button" class="role-toggle-btn" onclick="toggleRoleDropdown()">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </button>
+                                <div class="role-options" id="roleDropdown">
+                                    <a href="{% url 'student-dashboard' %}" class="role-option">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>Switch to Student</span>
+                                    </a>
+                                    <div class="role-option current">
+                                        <i class="fas fa-user-tie"></i>
+                                        <span>Organizer (Current)</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" title="Sign Out">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="dashboard-content">
+            <section id="edit-event-view" class="dashboard-view">
+                <header class="view-header">
+                    <h2>Edit Event</h2>
+                    <p>Update the details for your event below.</p>
+                </header>
+                <form id="event-form" class="event-form-container" method="POST" action="{% url 'edit_event' event.id %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="form-step active">
+                        <h3>Step 1: Basic Information</h3>
+                        <div class="form-group">
+                            <label for="event-title">Event Title</label>
+                            <input type="text" id="event-title" name="title" placeholder="e.g., Annual Tech Hackathon" value="{{ event.title }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-category">Category</label>
+                            <select id="event-category" name="category">
+                                <option value="hackathon" {% if event.category == 'hackathon' %}selected{% endif %}>Hackathon</option>
+                                <option value="workshop" {% if event.category == 'workshop' %}selected{% endif %}>Workshop</option>
+                                <option value="internship" {% if event.category == 'internship' %}selected{% endif %}>Internship</option>
+                                <option value="techevent" {% if event.category == 'techevent' %}selected{% endif %}>TechEvent</option> 
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-date">Event Date</label>
+                            <input type="date" id="event-date" name="date" value="{{ event.date|date:'Y-m-d' }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="event-time">Event Time</label>
+                            <input type="time" id="event-time" name="time" value="{{ event.time|time:'H:i' }}" required>
+                        </div>
+                    </div>
+                    <div class="form-step">
+                         <h3>Step 2: Details & Location</h3>
+                         <div class="form-group">
+                            <label for="event-description">Description</label>
+                            <textarea id="event-description" name="description" rows="5" placeholder="Describe your event...">{{ event.description }}</textarea>
+                         </div>
+                         <div class="form-group">
+                            <label for="event-location">Location</label>
+                            <input type="text" id="event-location" name="location" placeholder="e.g., Main Auditorium, City Center" value="{{ event.venue }}" required>
+                         </div>
+                         <div class="form-group">
+                             <label for="event-flyer">Event Flyer (Optional)</label>
+                             <div id="drag-drop-area" class="drag-drop-area">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p><strong>Drag & Drop</strong> an image here or click to upload</p>
+                                <input type="file" id="event-flyer" name="event_flyer" accept="image/*" hidden>
+                             </div>
+                             {% if event.image %}
+                                <img id="image-preview" class="image-preview" src="{{ event.image.url }}" alt="Current Event Image"/>
+                                <p style="margin-top: 10px; color: #6c757d; font-size: 14px;">Current image: {{ event.image.name }}</p>
+                             {% else %}
+                                <img id="image-preview" class="image-preview hidden" src="#" alt="Image Preview"/>
+                             {% endif %}
+                         </div>
+                        <div class="form-group">
+                            <label for="event-link">Event Registration Link <span class="required">*</span></label>
+                            <input type="url" id="event-link" name="event_link" placeholder="https://example.com/register" value="{{ event.registration_link }}" required />
+                            <small class="form-help">Registration link or event website is mandatory for all events</small>
+                         </div>
+                    </div>
+                    <div class="form-navigation">
+                        <button type="button" id="prevBtn" class="cta-button secondary hidden">Previous</button>
+                        <button type="button" id="nextBtn" class="cta-button primary">Next</button>
+                        <button type="submit" id="submitBtn" class="cta-button primary hidden">Update Event</button>
+                    </div>
+                </form>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Custom JavaScript for edit form navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            let currentStep = 0;
+            const steps = document.querySelectorAll('.form-step');
+            const nextBtn = document.getElementById('nextBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const submitBtn = document.getElementById('submitBtn');
+
+            function showStep(n) {
+                steps.forEach(step => step.classList.remove('active'));
+                if (steps[n]) {
+                    steps[n].classList.add('active');
+                }
+
+                // Update button visibility
+                prevBtn.classList.toggle('hidden', n === 0);
+                nextBtn.classList.toggle('hidden', n === steps.length - 1);
+                submitBtn.classList.toggle('hidden', n !== steps.length - 1);
+            }
+
+            // Next button click
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function() {
+                    if (currentStep < steps.length - 1) {
+                        currentStep++;
+                        showStep(currentStep);
+                    }
+                });
+            }
+
+            // Previous button click
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function() {
+                    if (currentStep > 0) {
+                        currentStep--;
+                        showStep(currentStep);
+                    }
+                });
+            }
+
+            // Initialize
+            showStep(currentStep);
+
+            // Drag and drop functionality for image upload
+            const dragDropArea = document.getElementById('drag-drop-area');
+            const fileInput = document.getElementById('event-flyer');
+            const imagePreview = document.getElementById('image-preview');
+
+            if (dragDropArea && fileInput) {
+                dragDropArea.addEventListener('click', () => fileInput.click());
+
+                dragDropArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.background = '#f0f8ff';
+                });
+
+                dragDropArea.addEventListener('dragleave', () => {
+                    dragDropArea.style.background = '';
+                });
+
+                dragDropArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dragDropArea.style.background = '';
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        previewImage(files[0]);
+                    }
+                });
+
+                fileInput.addEventListener('change', (e) => {
+                    if (e.target.files.length > 0) {
+                        previewImage(e.target.files[0]);
+                    }
+                });
+            }
+
+            function previewImage(file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Role Switcher Functionality
+        function toggleRoleDropdown() {
+            const dropdown = document.getElementById('roleDropdown');
+            dropdown.classList.toggle('show');
+        }
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const roleDropdown = document.getElementById('roleDropdown');
+            const roleToggleBtn = document.querySelector('.role-toggle-btn');
+            
+            if (roleDropdown && !roleDropdown.contains(event.target) && event.target !== roleToggleBtn) {
+                roleDropdown.classList.remove('show');
+            }
+        });
+        
+        // Close dropdown on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dropdown = document.getElementById('roleDropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

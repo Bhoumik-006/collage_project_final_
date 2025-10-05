@@ -1,0 +1,320 @@
+/* Custom Admin Panel CSS for StudentConnect */
+
+/* Fix approval status dropdown visibility and styling */
+.form-control.status-dropdown {
+    min-width: 250px !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border-radius: 6px !important;
+    border: 2px solid #ddd !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    z-index: 999 !important;
+    height: auto !important;
+    margin: 5px 0 !important;
+}
+
+/* Ensure dropdown options are fully visible */
+.form-control.status-dropdown option {
+    padding: 10px 15px !important;
+    font-size: 16px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    border: none !important;
+}
+
+/* Hover effect for dropdown options */
+.form-control.status-dropdown option:hover {
+    background-color: #f8f9fa !important;
+    color: #495057 !important;
+}
+
+/* Fix any container overflow issues */
+.form-row .field-status {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Ensure the admin form container doesn't cut off dropdowns */
+.module.aligned .form-row {
+    overflow: visible !important;
+}
+
+/* Specific styling for the approval status fieldset */
+fieldset.module.aligned .form-row .field-status {
+    min-height: 60px !important;
+    overflow: visible !important;
+}
+
+/* Fix for Django admin select widgets */
+.admin-autocomplete-wrapper select,
+.related-widget-wrapper select,
+select {
+    min-width: 200px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    overflow: visible !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    margin: 5px 0 !important;
+}
+
+/* Specific fixes for category and organizer dropdowns */
+.field-category select,
+.field-organizer select {
+    min-width: 300px !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border: 2px solid #007cba !important;
+    border-radius: 6px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    margin: 5px 0 !important;
+    overflow: visible !important;
+    z-index: 999 !important;
+}
+
+/* Focus styling for category and organizer dropdowns */
+.field-category select:focus,
+.field-organizer select:focus {
+    border-color: #0073aa !important;
+    box-shadow: 0 0 5px rgba(0, 115, 170, 0.3) !important;
+    outline: none !important;
+}
+
+/* Ensure dropdown containers have proper positioning */
+.field-category,
+.field-organizer {
+    position: relative !important;
+    z-index: 1001 !important;
+    min-height: 80px !important;
+    margin-bottom: 20px !important;
+    overflow: visible !important;
+}
+
+/* Fix dropdown options visibility for category and organizer */
+.field-category select option,
+.field-organizer select option {
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    border: none !important;
+    line-height: 1.5 !important;
+}
+
+/* Specific fix for status dropdown in fieldsets */
+.field-status select {
+    min-width: 250px !important;
+    width: 100% !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border: 2px solid #007cba !important;
+    border-radius: 6px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    margin: 5px 0 !important;
+}
+
+/* Status dropdown focus styling */
+.field-status select:focus {
+    border-color: #0073aa !important;
+    box-shadow: 0 0 5px rgba(0, 115, 170, 0.3) !important;
+    outline: none !important;
+}
+
+/* Ensure dropdown is above other elements */
+.field-status {
+    position: relative !important;
+    z-index: 1001 !important;
+}
+
+/* Fix for the entire approval status fieldset */
+fieldset.module.aligned h2:contains('Approval Status') + .form-row,
+.field-status,
+.field-denial_reason,
+.field-submission_info {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1000 !important;
+}
+
+/* Custom styling for approval status badges */
+.status-badge {
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 2px;
+}
+
+.status-pending {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.status-approved {
+    background-color: #28a745;
+    color: white;
+}
+
+.status-denied {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .form-control.status-dropdown,
+    .field-status select,
+    .field-category select,
+    .field-organizer select {
+        min-width: 200px !important;
+        font-size: 14px !important;
+        padding: 10px 12px !important;
+    }
+}
+
+/* Fix for text input fields to ensure consistent styling */
+.module.aligned .form-row input[type="text"],
+.module.aligned .form-row input[type="email"],
+.module.aligned .form-row input[type="url"],
+.module.aligned .form-row input[type="date"],
+.module.aligned .form-row input[type="time"],
+.module.aligned .form-row textarea {
+    min-width: 250px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    margin: 5px 0 15px 0 !important;
+}
+
+/* Focus states for all form elements */
+.module.aligned .form-row input:focus,
+.module.aligned .form-row select:focus,
+.module.aligned .form-row textarea:focus {
+    border-color: #0073aa !important;
+    box-shadow: 0 0 5px rgba(0, 115, 170, 0.3) !important;
+    outline: none !important;
+}
+
+/* Ensure proper spacing between form rows */
+.module.aligned .form-row {
+    margin-bottom: 25px !important;
+    padding-bottom: 10px !important;
+}
+
+/* Fix for labels to ensure they're properly positioned */
+.module.aligned .form-row label {
+    display: block !important;
+    margin-bottom: 8px !important;
+    font-weight: 600 !important;
+    color: #333 !important;
+    font-size: 14px !important;
+}
+
+/* Help text styling improvements */
+.module.aligned .form-row .help {
+    color: #666 !important;
+    font-size: 13px !important;
+    margin-top: 5px !important;
+    line-height: 1.4 !important;
+}
+
+/* Ensure admin form doesn't have overflow hidden */
+.module.aligned,
+.form-row,
+.field-box {
+    overflow: visible !important;
+}
+
+/* Fix for admin change form */
+#changelist-form,
+.change-form,
+.add-form {
+    overflow: visible !important;
+}
+
+/* Additional fix for any clipping issues */
+body.change-form #content,
+body.add-form #content {
+    overflow: visible !important;
+}
+
+/* Make sure all fieldsets have enough space */
+.field-status .form-row,
+.field-category .form-row,
+.field-organizer .form-row {
+    min-height: 80px !important;
+    margin-bottom: 20px !important;
+}
+
+/* Fix for all form fieldsets to prevent cutoff */
+fieldset.module.aligned .form-row {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 100 !important;
+    min-height: 60px !important;
+    margin-bottom: 15px !important;
+}
+
+/* Ensure all select elements have proper styling */
+.module.aligned .form-row select {
+    min-width: 250px !important;
+    padding: 12px 16px !important;
+    font-size: 16px !important;
+    border: 2px solid #ddd !important;
+    border-radius: 6px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    line-height: 1.5 !important;
+    box-sizing: border-box !important;
+    height: auto !important;
+    margin: 5px 0 15px 0 !important;
+    overflow: visible !important;
+    z-index: 999 !important;
+}
+
+/* Fix for the entire Event Information fieldset */
+fieldset.module.aligned h2,
+.module.aligned .form-row {
+    overflow: visible !important;
+}
+
+/* Specific container fixes */
+.module.aligned .form-row .field-title,
+.module.aligned .form-row .field-description,
+.module.aligned .form-row .field-category,
+.module.aligned .form-row .field-date,
+.module.aligned .form-row .field-time,
+.module.aligned .form-row .field-location,
+.module.aligned .form-row .field-organizer {
+    overflow: visible !important;
+    position: relative !important;
+    z-index: 1000 !important;
+    min-height: 70px !important;
+}

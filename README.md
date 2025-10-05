@@ -1,265 +1,629 @@
-# Personal Information Dashboard
+# StudentConnect 🎓
 
-A comprehensive Python application that provides real-time weather information, latest news updates, and daily inspirational quotes through a unified API interface.
+[![Django](https://img.shields.io/badge/Django-5.2.5-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.13+-blue.svg)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-## 🌟 Features
+> A comprehensive college event management platform that connects students and organizers, facilitating seamless event discovery, management, and participation with a unified account system.
 
-- **Real-time Weather Data**: Get current weather conditions for any city
-- **Latest News Updates**: Stay informed with the most recent news articles  
-- **Daily Inspiration**: Receive motivational quotes to start your day
-- **Simple API Interface**: Easy-to-use methods for all data retrieval
+## 📋 Table of Contents
 
-## 🔧 APIs Integrated
+- [Overview](#overview)
+- [Features](#features)
+- [Technology Stack](#technology-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [Project Structure](#project-structure)
+- [API Documentation](#api-documentation)
+- [Contributing](#contributing)
+- [License](#license)
+- [Support](#support)
 
-### 1. OpenWeather API 🌤️
-- **Purpose**: Real-time weather information for any city worldwide
-- **Provider**: OpenWeatherMap
-- **Endpoint**: `http://api.openweathermap.org/data/2.5/weather`
-- **Installation**: No additional packages required (uses `requests`)
-- **Data Provided**: 
-  - Current temperature (Celsius/Fahrenheit)
-  - Weather conditions (sunny, cloudy, rainy, etc.)
-  - Humidity and atmospheric pressure
-  - Wind speed and direction
-  - Visibility and cloud coverage
-- **Authentication**: Requires free API key
-- **Rate Limit**: 1,000 calls/day (free tier), 60 calls/minute
-- **Use Case**: Display current weather for user's location or any specified city
+## 🌟 Overview
 
-### 2. News API 📰
-- **Purpose**: Access to current news articles and headlines
-- **Provider**: NewsAPI.org
-- **Endpoint**: `https://newsapi.org/v2/everything`
-- **Installation**: No additional packages required (uses `requests`)
-- **Data Provided**:
-  - Latest news articles with titles and descriptions
-  - Article URLs for full content
-  - Publication dates and source information
-  - Author details and article images
-  - Customizable by topic, source, or keyword
-- **Authentication**: Requires free API key
-- **Rate Limit**: 1,000 requests/day (free tier)
-- **Use Case**: Keep users informed with personalized news feeds and trending topics
+StudentConnect is a modern, responsive web application designed to bridge the gap between students and event organizers in college environments. The platform features a **unified account system** that allows users to seamlessly switch between student and organizer roles, making event management and participation more intuitive than ever.
 
-### 3. Quotable API 💭
-- **Purpose**: Daily inspiration and motivational content
-- **Provider**: Quotable (Open Source)
-- **Endpoint**: `https://api.quotable.io/random`
-- **Installation**: No additional packages required (uses `requests`)
-- **Data Provided**:
-  - Random inspirational and motivational quotes
-  - Author information and biographical details
-  - Quote categories and tags
-  - Length-based quote filtering
-- **Authentication**: No API key required (completely free)
-- **Rate Limit**: No restrictions (public API)
-- **Use Case**: Provide daily motivation, inspiration for productivity apps, or educational content
+### Key Highlights
+- **Unified Account System**: One account for both student and organizer functionalities
+- **Role-based Dashboards**: Tailored interfaces for different user types
+- **Real-time Updates**: Auto-refresh functionality for live event updates
+- **Modern UI/UX**: Professional, responsive design across all devices
+- **Comprehensive Event Management**: From creation to approval to participation
+
+## 🚀 Features
+
+### 🎓 For Students
+- **Unified Account Access**: Single login for all platform features
+- **Event Discovery Hub**: Browse upcoming events with advanced filtering
+- **Interactive Dashboard**: Real-time event updates and notifications
+- **Detailed Event Views**: Rich event information with multimedia support
+- **Profile Management**: Customizable profiles with avatar uploads
+- **Role Switching**: Seamlessly switch to organizer mode when needed
+
+### 🎯 For Organizers
+- **Event Creation Suite**: Comprehensive event creation with rich details
+- **Media Management**: Upload event flyers and promotional materials
+- **Approval Workflow**: Professional event submission and tracking system
+- **Category Management**: Organize events by type (Hackathons, Workshops, etc.)
+- **Contact Management**: Integrated contact and registration link management
+- **Analytics Dashboard**: Track event performance and engagement
+
+### 👨‍💼 For Administrators
+- **Event Approval System**: Professional review and approval workflow
+- **User Management**: Comprehensive user account management
+- **Platform Analytics**: Monitor platform activity and usage metrics
+- **Content Moderation**: Ensure quality and appropriate content
+- **Database Management**: Advanced admin interface for all operations
+
+### ⚡ Technical Features
+- **Responsive Design**: Mobile-first approach with desktop optimization
+- **Security First**: CSRF protection, secure sessions, input validation
+- **File Management**: Secure image uploads with proper validation
+- **Database Optimization**: Efficient queries and proper indexing
+- **Error Handling**: Comprehensive error handling and user feedback
+
+## 🛠️ Technology Stack
+
+### Backend
+- **Framework**: Django 5.2.5
+- **Language**: Python 3.13+
+- **Database**: SQLite (Development) / PostgreSQL (Production)
+- **Authentication**: Django's built-in auth system with custom profiles
+
+### Frontend
+- **Languages**: HTML5, CSS3, JavaScript (ES6+)
+- **Styling**: Custom CSS with modern design patterns
+- **Icons**: Font Awesome for consistent iconography
+- **Fonts**: Inter font family for professional typography
+
+### Security & Performance
+- **Security**: CSRF tokens, secure headers, input sanitization
+- **Performance**: Optimized queries, static file compression
+- **Validation**: Both client-side and server-side validation
+- **Error Handling**: Comprehensive logging and error reporting
 
 ## 📋 Prerequisites
 
-- Python 3.7+
-- API keys for Weather and News APIs
+Before you begin, ensure you have the following installed on your system:
 
-## 🚀 Installation
+### Required Software
+- **Python 3.13 or higher** ([Download here](https://www.python.org/downloads/))
+- **Git** ([Download here](https://git-scm.com/downloads))
+- **pip** (Python package installer - comes with Python)
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd personal-information-dashboard
-   ```
+### System Requirements
+- **Operating System**: Windows 10+, macOS 10.14+, or Linux
+- **RAM**: Minimum 4GB (8GB recommended for development)
+- **Storage**: At least 500MB free space
+- **Browser**: Chrome 80+, Firefox 75+, Safari 13+, or Edge 80+
 
-2. **Install required packages**
-   ```bash
-   pip install -r requirements.txt
-   ```
+### Development Tools (Recommended)
+- **Code Editor**: Visual Studio Code, PyCharm, or Sublime Text
+- **Database Client**: DB Browser for SQLite or pgAdmin for PostgreSQL
+- **Git Client**: GitHub Desktop or command line Git
 
-3. **Set up environment variables**
-   
-   Create a `.env` file in the project root:
-   ```bash
-   # API Keys (replace with your actual keys)
-   WEATHER_API_KEY=your_openweather_api_key_here
-   NEWS_API_KEY=your_news_api_key_here
-   ```
+## 🔧 Installation
 
-## 🔑 API Installation & Setup
+Follow these step-by-step instructions to set up StudentConnect on your local machine:
 
-### Required Python Packages
+### 1. Clone the Repository
+
 ```bash
-# Install all required packages
-pip install -r requirements.txt
+# Clone the repository
+git clone https://github.com/Bhoumik-006/collage_project_final_.git
 
-# Or install individually:
-pip install requests>=2.31.0
-pip install python-dotenv>=1.0.0
+# Navigate to the project directory
+cd collage_project_final_
 ```
 
-### OpenWeather API Setup 🌤️
-1. **Sign Up**: Visit [OpenWeatherMap](https://openweathermap.org/api)
-2. **Create Account**: Register for a free account
-3. **Generate API Key**: 
-   - Go to "API Keys" section in your account
-   - Copy your default API key
-4. **Add to Environment**: 
-   ```bash
-   WEATHER_API_KEY=your_actual_api_key_here
-   ```
-5. **Verify Setup**: Test with a simple API call
-6. **Free Tier Limits**: 1,000 calls/day, 60 calls/minute
+### 2. Set Up Python Virtual Environment
 
-### News API Setup 📰
-1. **Sign Up**: Visit [NewsAPI.org](https://newsapi.org/)
-2. **Register Account**: Create free developer account
-3. **Get API Key**: 
-   - Access your dashboard
-   - Copy your API key from the account page
-4. **Add to Environment**:
-   ```bash
-   NEWS_API_KEY=your_news_api_key_here
-   ```
-5. **Verify Setup**: Test with a sample news request
-6. **Free Tier Limits**: 1,000 requests/day
+```bash
+# Create a virtual environment
+python -m venv studentconnect_env
 
-### Quotable API Setup 💭
-- **No Setup Required**: Completely free public API
-- **No Registration**: No account or API key needed
-- **No Rate Limits**: Unlimited usage
-- **Ready to Use**: Works immediately with requests library
+# Activate the virtual environment
+# On Windows:
+studentconnect_env\Scripts\activate
+# On macOS/Linux:
+source studentconnect_env/bin/activate
+```
 
-## 💻 Usage & Implementation
+### 3. Install Dependencies
 
-### Quick Start Example
+```bash
+# Upgrade pip to the latest version
+python -m pip install --upgrade pip
 
+# Install Django
+pip install django==5.2.5
+
+# Install Pillow for image handling
+pip install pillow
+
+# Install additional recommended packages
+pip install python-decouple  # For environment variables
+pip install django-crispy-forms  # For better form styling (optional)
+```
+
+### 4. Navigate to Project Directory
+
+```bash
+# Navigate to the Django project folder
+cd "final collage project/final collage project/final collage project/final collage project/Full Minor project/Full Minor project/studentconnect"
+```
+
+### 5. Configure the Database
+
+```bash
+# Create database migrations
+python manage.py makemigrations
+
+# Apply migrations to create database tables
+python manage.py migrate
+
+# Migrate existing users to unified system (if applicable)
+python manage.py migrate_to_unified_accounts
+```
+
+### 6. Create Superuser Account
+
+```bash
+# Create an admin account
+python manage.py createsuperuser
+
+# Follow the prompts to set username, email, and password
+```
+
+### 7. Start the Development Server
+
+```bash
+# Run the development server
+python manage.py runserver
+
+# The server will start at http://127.0.0.1:8000/
+```
+
+### 8. Access the Application
+
+Open your web browser and navigate to:
+- **Main Application**: http://127.0.0.1:8000/
+- **Admin Panel**: http://127.0.0.1:8000/admin/
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+For production deployment, create a `.env` file in the project root:
+
+```env
+# Security
+SECRET_KEY=your-secret-key-here
+DEBUG=False
+
+# Allowed hosts (comma-separated)
+ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com,127.0.0.1
+
+# Database (for production)
+DATABASE_URL=postgresql://user:password@localhost:5432/studentconnect
+
+# Email settings (optional)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_HOST_USER=your-email@gmail.com
+EMAIL_HOST_PASSWORD=your-app-password
+EMAIL_USE_TLS=True
+
+# Media and Static files
+MEDIA_URL=/media/
+STATIC_URL=/static/
+```
+
+### Database Configuration
+
+#### For Development (SQLite - Default)
+No additional configuration needed. The SQLite database will be created automatically.
+
+#### For Production (PostgreSQL)
 ```python
-from api_handler import APIHandler
-
-# Initialize the API handler
-api = APIHandler()
-
-# 🌤️ Weather API Usage
-weather_data = api.get_weather("New York")
-if weather_data:
-    temp = weather_data['main']['temp']
-    condition = weather_data['weather'][0]['description']
-    humidity = weather_data['main']['humidity']
-    print(f"🌡️ Temperature: {temp}°C")
-    print(f"☁️ Condition: {condition.title()}")
-    print(f"💧 Humidity: {humidity}%")
-
-# 📰 News API Usage
-news_data = api.get_news("technology", limit=5)
-if news_data and 'articles' in news_data:
-    print("\n📰 Latest Tech News:")
-    for i, article in enumerate(news_data['articles'][:3], 1):
-        print(f"{i}. {article['title']}")
-        print(f"   Source: {article['source']['name']}")
-        print(f"   URL: {article['url']}")
-
-# 💭 Quote API Usage
-quote_data = api.get_random_quote()
-if quote_data:
-    print(f"\n💭 Daily Inspiration:")
-    print(f"'{quote_data['content']}'")
-    print(f"— {quote_data['author']}")
+# In settings.py, update DATABASES setting:
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'studentconnect',
+        'USER': 'your_username',
+        'PASSWORD': 'your_password',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    }
+}
 ```
 
-### Advanced Usage Examples
+## 📖 Usage
 
-```python
-# Custom weather for multiple cities
-cities = ["London", "Tokyo", "Sydney"]
-for city in cities:
-    weather = api.get_weather(city)
-    if weather:
-        temp = weather['main']['temp']
-        print(f"{city}: {temp}°C")
+### Getting Started
 
-# Specific news topics
-topics = ["python", "artificial intelligence", "climate change"]
-for topic in topics:
-    news = api.get_news(topic, limit=2)
-    if news:
-        print(f"\nNews about {topic.title()}:")
-        for article in news['articles']:
-            print(f"- {article['title']}")
+1. **Visit the Landing Page**
+   - Navigate to http://127.0.0.1:8000/
+   - Explore the platform features and information
 
-# Multiple inspirational quotes
-for i in range(3):
-    quote = api.get_random_quote()
-    if quote:
-        print(f"{i+1}. \"{quote['content']}\" - {quote['author']}")
-```
+2. **Create an Account**
+   - Click "Sign Up" and choose your preferred initial role
+   - Fill in your details (name, email, password)
+   - The system creates both student and organizer profiles automatically
 
-### API Methods
+3. **Login and Explore**
+   - Login with your credentials
+   - Choose your role (Student or Organizer)
+   - Explore the role-specific dashboard
 
-#### `get_weather(city="London")`
-- **Parameters**: `city` (string, optional) - City name for weather data
-- **Returns**: JSON object with weather information
-- **Example**:
-  ```python
-  weather = api.get_weather("Paris")
-  ```
+### User Workflows
 
-#### `get_news(query="technology", limit=5)`
-- **Parameters**: 
-  - `query` (string, optional) - News topic or keyword
-  - `limit` (int, optional) - Number of articles to retrieve
-- **Returns**: JSON object with news articles
-- **Example**:
-  ```python
-  news = api.get_news("sports", limit=10)
-  ```
+#### As a Student
+1. **Dashboard Access**: View approved events in your student dashboard
+2. **Event Discovery**: Browse events by category, date, or search
+3. **Event Details**: Click on events to view detailed information
+4. **Profile Management**: Update your profile and upload an avatar
+5. **Role Switching**: Use the role switcher to access organizer features
 
-#### `get_random_quote()`
-- **Parameters**: None
-- **Returns**: JSON object with random quote and author
-- **Example**:
-  ```python
-  quote = api.get_random_quote()
-  ```
+#### As an Organizer
+1. **Event Creation**: Create new events with detailed information
+2. **Media Upload**: Add event flyers and promotional images
+3. **Event Management**: Edit, delete, or track your submitted events
+4. **Approval Tracking**: Monitor the approval status of your events
+5. **Role Switching**: Switch to student mode to view approved events
+
+#### As an Administrator
+1. **Admin Panel**: Access Django admin at /admin/
+2. **Event Approval**: Review and approve/deny submitted events
+3. **User Management**: Manage user accounts and permissions
+4. **Content Moderation**: Monitor platform content for quality
+
+### Role Switching
+
+The unified account system allows seamless role switching:
+
+1. **In Any Dashboard**: Click the role switcher dropdown (⚡ icon)
+2. **Select Role**: Choose between Student and Organizer modes
+3. **Instant Switch**: No re-login required, instant access to new role
 
 ## 📁 Project Structure
 
 ```
-├── api_handler.py          # Main API integration class
-├── requirements.txt        # Project dependencies
-├── .env                   # Environment variables (not tracked)
-├── .gitignore            # Git ignore file
-└── README.md             # Project documentation
+studentconnect/
+├── 📁 accounts/                     # User management and authentication
+│   ├── 📄 models.py                # User, UserProfile, Event models
+│   ├── 📄 views.py                 # Authentication and dashboard logic
+│   ├── 📄 forms.py                 # User registration and event forms
+│   ├── 📄 urls.py                  # URL routing for accounts
+│   ├── 📄 admin.py                 # Admin interface configuration
+│   ├── 📄 signals.py               # User signal handlers
+│   ├── 📁 migrations/              # Database migration files
+│   ├── 📁 management/              # Custom management commands
+│   │   └── 📁 commands/
+│   │       └── 📄 migrate_to_unified_accounts.py
+│   └── 📁 templatetags/            # Custom template tags
+├── 📁 studentconnect/              # Main project configuration
+│   ├── 📄 settings.py              # Django settings and configuration
+│   ├── 📄 urls.py                  # Main URL configuration
+│   ├── 📄 wsgi.py                  # WSGI configuration for deployment
+│   └── 📄 asgi.py                  # ASGI configuration for async
+├── 📁 templates/                   # HTML templates
+│   ├── 📄 landing.html             # Homepage template
+│   ├── 📄 login.html               # Login/registration page
+│   ├── 📄 student-dashboard.html   # Student interface
+│   ├── 📄 organizer-dashboard.html # Organizer interface
+│   ├── 📄 event_detail.html        # Event details page
+│   ├── 📄 about.html               # About page
+│   └── 📁 admin/                   # Admin interface templates
+├── 📁 static/                      # Static files (CSS, JS, images)
+│   ├── 📁 css/                     # Stylesheets
+│   │   ├── 📄 student.css          # Student dashboard styles
+│   │   ├── 📄 organizer.css        # Organizer dashboard styles
+│   │   └── 📄 landing.css          # Landing page styles
+│   ├── 📁 js/                      # JavaScript files
+│   │   ├── 📄 student.js           # Student functionality
+│   │   ├── 📄 organizer.js         # Organizer functionality
+│   │   └── 📄 common.js            # Shared JavaScript
+│   ├── 📁 images/                  # Static images and assets
+│   └── 📁 admin/                   # Django admin static files
+├── 📁 media/                       # User uploaded files
+│   ├── 📁 avatars/                 # User profile pictures
+│   └── 📁 event_flyers/            # Event promotional images
+├── 📄 manage.py                    # Django management script
+├── 📄 db.sqlite3                   # Development database
+├── 📄 requirements.txt             # Python dependencies
+├── 📄 README.md                    # Project documentation
+├── 📄 TODO.md                      # Development tasks and roadmap
+└── 📄 UNIFIED_ACCOUNT_IMPLEMENTATION.md  # Unified system docs
 ```
 
-## 🛠️ Error Handling
+## 🔌 API Documentation
 
-All API methods include comprehensive error handling:
-- Network timeout protection (5-second timeout)
-- HTTP status code validation
-- Exception catching with descriptive error messages
-- Graceful degradation (returns `None` on failure)
+### Authentication Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/login/` | GET, POST | User login and authentication |
+| `/logout/` | POST | User logout |
+| `/signup/` | POST | New user registration |
+| `/organizer-signup/` | GET, POST | Organizer-specific signup |
+
+### Dashboard Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/student-dashboard/` | GET | Student dashboard view |
+| `/organizer-dashboard/` | GET | Organizer dashboard view |
+| `/profile/update/` | POST | Update user profile |
+
+### Event Management
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/create-event/` | POST | Create new event |
+| `/edit-event/<id>/` | GET, POST | Edit existing event |
+| `/delete-event/<id>/` | POST | Delete event |
+| `/event/<id>/` | GET | View event details |
+
+## 🧪 Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+python manage.py test
+
+# Run specific app tests
+python manage.py test accounts
+
+# Run with verbose output
+python manage.py test --verbosity=2
+
+# Generate coverage report
+pip install coverage
+coverage run --source='.' manage.py test
+coverage report
+```
+
+### Test Types
+
+- **Unit Tests**: Model and utility function testing
+- **Integration Tests**: View and form testing
+- **Authentication Tests**: Login/logout functionality
+- **Database Tests**: Model relationships and queries
+
+## 🚀 Deployment
+
+### Production Checklist
+
+- [ ] Set `DEBUG = False` in settings
+- [ ] Configure proper `ALLOWED_HOSTS`
+- [ ] Set up environment variables
+- [ ] Configure production database (PostgreSQL)
+- [ ] Set up static files serving
+- [ ] Configure media files storage
+- [ ] Set up HTTPS/SSL certificates
+- [ ] Configure email backend
+- [ ] Set up logging and monitoring
+
+### Deployment Options
+
+#### Heroku Deployment
+```bash
+# Install Heroku CLI and login
+heroku login
+
+# Create Heroku app
+heroku create studentconnect-app
+
+# Set environment variables
+heroku config:set SECRET_KEY=your-secret-key
+heroku config:set DEBUG=False
+
+# Deploy
+git push heroku main
+```
+
+#### Docker Deployment
+```dockerfile
+# Dockerfile
+FROM python:3.13-slim
+
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+COPY . .
+EXPOSE 8000
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+```
+
+## 🎨 Customization
+
+### Theming
+
+The application supports easy theming through CSS custom properties:
+
+```css
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #f59e0b;
+    --accent-color: #10b981;
+    --background-color: #f8fafc;
+    --text-color: #0f172a;
+}
+```
+
+### Adding New Event Categories
+
+1. Update the `CATEGORY_CHOICES` in `models.py`
+2. Create migrations: `python manage.py makemigrations`
+3. Apply migrations: `python manage.py migrate`
+4. Update templates and forms as needed
+
+### Custom User Fields
+
+Add custom fields to the `UserProfile` model and create appropriate migrations.
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+#### Server Won't Start
+```bash
+# Check if port 8000 is in use
+netstat -an | grep 8000
+
+# Use different port
+python manage.py runserver 8080
+```
+
+#### Database Issues
+```bash
+# Reset database (⚠️ Deletes all data)
+rm db.sqlite3
+python manage.py migrate
+
+# Fix migration conflicts
+python manage.py migrate --fake accounts zero
+python manage.py migrate accounts
+```
+
+#### Static Files Not Loading
+```bash
+# Collect static files
+python manage.py collectstatic
+
+# Check STATIC_URL in settings.py
+```
+
+### Performance Optimization
+
+- **Database**: Add indexes to frequently queried fields
+- **Images**: Compress uploaded images automatically
+- **Caching**: Implement Redis caching for frequently accessed data
+- **CDN**: Use CDN for static file delivery in production
 
 ## 🤝 Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+We welcome contributions from the community! Here's how you can help:
+
+### Getting Started
+
+1. **Fork the Repository**
+   ```bash
+   # Fork on GitHub, then clone your fork
+   git clone https://github.com/YOUR_USERNAME/collage_project_final_.git
+   ```
+
+2. **Create a Feature Branch**
+   ```bash
+   git checkout -b feature/amazing-new-feature
+   ```
+
+3. **Make Your Changes**
+   - Follow PEP 8 style guidelines
+   - Add comments to complex code
+   - Update documentation as needed
+
+4. **Test Your Changes**
+   ```bash
+   python manage.py test
+   ```
+
+5. **Commit and Push**
+   ```bash
+   git commit -m "Add amazing new feature"
+   git push origin feature/amazing-new-feature
+   ```
+
+6. **Create Pull Request**
+   - Describe your changes clearly
+   - Reference any related issues
+   - Include screenshots for UI changes
+
+### Development Guidelines
+
+- **Code Style**: Follow PEP 8 for Python code
+- **Documentation**: Update README and inline docs
+- **Testing**: Add tests for new features
+- **Security**: Never commit sensitive information
 
 ## 📜 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔗 API Documentation
+```
+MIT License
 
-- [OpenWeather API Documentation](https://openweathermap.org/api)
-- [News API Documentation](https://newsapi.org/docs)
-- [Quotable API Documentation](https://github.com/lukePeavey/quotable)
+Copyright (c) 2025 Bhoumik
 
-## ⚠️ Rate Limits
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-- **OpenWeather API**: 1000 calls/day (free tier)
-- **News API**: 1000 requests/day (free tier)
-- **Quotable API**: No rate limits (public API)
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+```
 
-## 📞 Support
+## 👥 Authors & Contributors
 
-If you encounter any issues or have questions, please open an issue in this repository.
+### Core Team
+- **Bhoumik** - *Project Lead & Full-Stack Developer* - [Bhoumik-006](https://github.com/Bhoumik-006)
+
+### Contributors
+- Thanks to all contributors who have helped improve this project
+- Special thanks to the Django community for the excellent framework
+
+## 🙏 Acknowledgments
+
+- **Django Framework**: For providing a robust web development framework
+- **Font Awesome**: For beautiful icons and UI elements
+- **Unsplash**: For high-quality placeholder images
+- **Inter Font**: For professional typography
+- **College Community**: For feedback and testing support
+- **Open Source Community**: For inspiration and best practices
+
+## 📞 Support & Contact
+
+### Getting Help
+
+- **Documentation**: Check this README and inline documentation
+- **Issues**: [Create a GitHub issue](https://github.com/Bhoumik-006/collage_project_final_/issues)
+- **Discussions**: Use GitHub Discussions for questions and ideas
+
+### Contact Information
+
+- **Email**: [Contact via GitHub](https://github.com/Bhoumik-006)
+- **GitHub**: [@Bhoumik-006](https://github.com/Bhoumik-006)
+- **Project Repository**: [collage_project_final_](https://github.com/Bhoumik-006/collage_project_final_)
+
+### Reporting Bugs
+
+When reporting bugs, please include:
+- Python and Django versions
+- Operating system
+- Steps to reproduce the issue
+- Expected vs actual behavior
+- Screenshots (if applicable)
+
+---
+
+<div align="center">
+
+**Made with ❤️ for college communities worldwide**
+
+[![GitHub stars](https://img.shields.io/github/stars/Bhoumik-006/collage_project_final_.svg?style=social)](https://github.com/Bhoumik-006/collage_project_final_)
+[![GitHub forks](https://img.shields.io/github/forks/Bhoumik-006/collage_project_final_.svg?style=social)](https://github.com/Bhoumik-006/collage_project_final_/fork)
+
+*StudentConnect - Connecting students and organizers for better college experiences*
+
+</div>
