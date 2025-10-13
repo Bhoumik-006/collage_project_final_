@@ -166,12 +166,10 @@
         
         <form method="post">
             {% csrf_token %}
-            <div class="form-group">
-                {{ form.denial_reason.label_tag }}
-                {{ form.denial_reason }}
-                {% if form.denial_reason.help_text %}
-                    <div class="help-text">{{ form.denial_reason.help_text }}</div>
-                {% endif %}
+            <div class="confirmation-message">
+                <p style="font-size: 16px; color: #495057; margin-bottom: 20px;">
+                    Are you sure you want to deny this event? This action will change the event status to "Denied".
+                </p>
             </div>
             
             <div class="form-actions">

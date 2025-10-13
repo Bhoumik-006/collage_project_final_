@@ -2,7 +2,6 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from .models import User, UserProfile, Event
-from .forms import DenyEventForm
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 from django.urls import path
@@ -30,12 +29,7 @@ class EventAdminForm(forms.ModelForm):
                 'class': 'form-control organizer-dropdown',
                 'style': 'min-width: 300px; width: 100%; padding: 12px 16px; font-size: 16px; border-radius: 6px; border: 2px solid #007cba; background-color: #fff; color: #333; line-height: 1.5; box-sizing: border-box; overflow: visible; z-index: 999;'
             }),
-            'denial_reason': forms.Textarea(attrs={
-                'class': 'form-control',
-                'style': 'min-width: 400px; min-height: 100px; padding: 10px; font-size: 14px; border-radius: 6px;',
-                'rows': 4,
-                'placeholder': 'Enter reason for denial (if applicable)...'
-            }),
+
             'description': forms.Textarea(attrs={
                 'rows': 5,
                 'style': 'width: 100%; padding: 10px;'
@@ -141,7 +135,7 @@ admin.site.index_title = "Event Management Dashboard"
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     form = EventAdminForm  # Use custom form
-    list_display = ('title', 'category', 'organizer', 'date', 'status_display', 'image_preview', 'get_deletion_status', 'get_denial_reason', 'styling_applied', 'days_since_submission')
+    list_display = ('title', 'category', 'organizer', 'date', 'status_display', 'image_preview', 'get_deletion_status', 'styling_applied', 'days_since_submission')
     list_filter = ('status', 'category', 'date', 'styling_applied', 'deleted_at', 'is_featured')
     search_fields = ('title', 'description', 'organizer__user__username', 'organizer__user__email')
     actions = ['approve_events', 'deny_events', 'delete_events', 'feature_events', 'bulk_approve_pending']
@@ -166,7 +160,7 @@ class EventAdmin(admin.ModelAdmin):
         }),
 
         ('✅ Approval Status', {
-            'fields': ('status', 'denial_reason', 'submission_info'),
+            'fields': ('status', 'submission_info'),
             'classes': ('wide',),
         }),
 
@@ -180,11 +174,7 @@ class EventAdmin(admin.ModelAdmin):
         ]
         return custom_urls + urls
 
-    def get_denial_reason(self, obj):
-        if obj.status == 'denied' and obj.denial_reason:
-            return obj.denial_reason[:50] + '...' if len(obj.denial_reason) > 50 else obj.denial_reason
-        return '-'
-    get_denial_reason.short_description = 'Denial Reason'
+
     
     def get_deletion_status(self, obj):
         if obj.is_deleted:
@@ -196,7 +186,6 @@ class EventAdmin(admin.ModelAdmin):
         approved_count = 0
         for event in queryset:
             event.status = 'approved'
-            event.denial_reason = ''
             event.save()  # Save first to update status
             event.apply_auto_styling()  # Then apply auto-styling
             approved_count += 1
@@ -245,7 +234,6 @@ class EventAdmin(admin.ModelAdmin):
         
         for event in pending_events:
             event.status = 'approved'
-            event.denial_reason = ''
             event.save()
             event.apply_auto_styling()
             approved_count += 1
@@ -309,19 +297,13 @@ class EventAdmin(admin.ModelAdmin):
     def deny_event_view(self, request, event_id):
         event = Event.objects.get(id=event_id)
         if request.method == 'POST':
-            form = DenyEventForm(request.POST)
-            if form.is_valid():
-                event.status = 'denied'
-                event.denial_reason = form.cleaned_data['denial_reason']
-                event.save()
-                self.message_user(request, "Event has been denied.")
-                return HttpResponseRedirect("../../")
-        else:
-            form = DenyEventForm()
-
+            event.status = 'denied'
+            event.save()
+            self.message_user(request, "Event has been denied.")
+            return HttpResponseRedirect("../../")
+        
         context = {
             'event': event,
-            'form': form,
             'opts': self.model._meta,
             'title': f"Deny Event: {event.title}",
         }
