@@ -473,7 +473,7 @@
             <section id="dashboard-overview" class="dashboard-view">
                 <header class="view-header">
                     <h2>Dashboard Overview</h2>
-                    <p>Welcome, TechEvents Inc!</p>
+                    <p>Welcome back, {% if user.get_full_name %}{{ user.get_full_name }}{% elif user.first_name %}{{ user.first_name }}{% else %}{{ user.username }}{% endif %}! 👋</p>
                 </header>
                 <div class="analytics-grid">
                     <div class="analytics-card">
