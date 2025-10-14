@@ -389,6 +389,30 @@
             color: #495057;
         }
         
+        .empty-state .cta-button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .empty-state .cta-button:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+        }
+        
+        .empty-state .cta-button:active {
+            transform: translateY(0);
+        }
+        
         .bookmark-header {
             background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             border-left: 4px solid #007bff;
@@ -878,7 +902,7 @@
                             <i class="fas fa-bookmark" style="font-size: 4rem; color: #ddd; margin-bottom: 1rem;"></i>
                             <h4>No Saved Events Yet</h4>
                             <p>Start exploring events and bookmark the ones you're interested in!</p>
-                            <button onclick="showPage('discover')" class="cta-button primary">Discover Events</button>
+                            <button onclick="navigateToDiscover()" class="cta-button primary">Discover Events</button>
                         </div>
                     </div>
                 </div>
@@ -1443,6 +1467,42 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeBookmarks();
         });
+        
+        // Navigation function for Discover Events button
+        function navigateToDiscover() {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.add('hidden');
+            });
+            
+            // Show discover page
+            const discoverPage = document.getElementById('discover-page');
+            if (discoverPage) {
+                discoverPage.classList.remove('hidden');
+            }
+            
+            // Update sidebar navigation
+            document.querySelectorAll('.sidebar-nav li').forEach(li => {
+                li.classList.remove('active');
+            });
+            
+            const discoverNavItem = document.querySelector('[data-page="discover"]');
+            if (discoverNavItem) {
+                discoverNavItem.classList.add('active');
+            }
+            
+            // Show success notification
+            showNotification('Switched to Discover Events!', 'success');
+        }
+        
+        // Alternative function that works with existing student.js
+        function showPage(pageId) {
+            if (typeof window.showPage === 'function') {
+                window.showPage(pageId);
+            } else {
+                navigateToDiscover();
+            }
+        }
         
         // Student dashboard JavaScript functionality
     </script>
